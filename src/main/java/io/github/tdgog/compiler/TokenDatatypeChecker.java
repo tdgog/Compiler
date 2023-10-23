@@ -4,11 +4,17 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 /**
  * A class to check the datatype of a token
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TokenDatatypeChecker {
+
+    private static final BigInteger intMax = BigInteger.valueOf(Integer.MAX_VALUE);
+    private static final BigDecimal doubleMax = BigDecimal.valueOf(Double.MAX_VALUE);
 
     /**
      * Checks if a string is a valid integer
@@ -19,11 +25,20 @@ public final class TokenDatatypeChecker {
         if (string.charAt(0) == '-')
             string = string.substring(1);
 
-        for (char character : string.toCharArray())
-            if (!Character.isDigit(character))
-                return false;
+        if (string.contains("."))
+            return false;
 
-        return true;
+        return new BigInteger(string).compareTo(intMax) <= 0;
+    }
+
+    public static boolean isFloat(@NotNull String string) {
+        if (string.charAt(0) == '-')
+            string = string.substring(1);
+
+        if (string.charAt(0) == '.')
+            string = '0' + string;
+
+        return new BigDecimal(string).compareTo(doubleMax) <= 0;
     }
 
 }

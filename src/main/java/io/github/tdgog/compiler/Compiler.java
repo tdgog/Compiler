@@ -1,8 +1,9 @@
 package io.github.tdgog.compiler;
 
-import io.github.tdgog.compiler.Syntax.Expressions.ExpressionSyntax;
+import io.github.tdgog.compiler.Colors.Colors;
 import io.github.tdgog.compiler.Syntax.SyntaxNode;
 import io.github.tdgog.compiler.Syntax.SyntaxToken;
+import io.github.tdgog.compiler.Syntax.SyntaxTree;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Scanner;
@@ -15,16 +16,40 @@ public class Compiler {
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
+        boolean showTree = false;
+
         while (true) {
             // Get the line from the shell
+            System.out.print("> ");
             String line = scanner.nextLine();
-            if(line == null || line.isBlank() || line.isEmpty())
+            if (line == null || line.isBlank() || line.isEmpty())
                 return;
 
+            if (line.equalsIgnoreCase("!showtree")) {
+                showTree = !showTree;
+                System.out.println("Show parse tree: " + showTree);
+                continue;
+            } else if (line.equalsIgnoreCase("!clear")) {
+                System.out.println("\n".repeat(100));
+                continue;
+            }
+
             // Parse and print the syntax tree
-            Parser parser = new Parser(line);
-            ExpressionSyntax expression = parser.parse();
-            prettyPrint(expression);
+            SyntaxTree syntaxTree = SyntaxTree.parse(line);
+            if (showTree)
+                prettyPrint(syntaxTree.getRoot());
+
+            if (!syntaxTree.getDiagnostics().isEmpty()) {
+                System.out.println(Colors.Foreground.ANSI_RED);
+                for (String diagnostic : syntaxTree.getDiagnostics())
+                    System.out.println(diagnostic);
+                System.out.println(Colors.ANSI_RESET);
+            } else {
+                // Evaluate the syntax tree
+                Evaluator evaluator = new Evaluator(syntaxTree.getRoot());
+                Number result = evaluator.evaluate();
+                System.out.println(result);
+            }
         }
     }
 

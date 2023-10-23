@@ -6,15 +6,18 @@ package io.github.tdgog.compiler.Syntax;
 public enum SyntaxKind {
     StringToken,
     IntegerToken,
+    FloatToken,
     PlusToken,
     MinusToken,
-    TimesToken,
+    MultiplyToken,
     DivideToken,
     OpenBracketToken,
     CloseBracketToken,
     BadToken,
     EOFToken,
     IntegerExpression,
+    FloatExpression,
     BinaryExpression,
-    WhitespaceToken
+    BracketExpression,
+    ModuloToken, WhitespaceToken
 }
