@@ -110,42 +110,47 @@ public class Parser {
      * @return The expression tree
      */
     public SyntaxTree parse() {
-        ExpressionSyntax expression = parseTerm();
+        ExpressionSyntax expression = parseExpression();
         SyntaxToken eofToken = match(SyntaxKind.EOFToken);
         return new SyntaxTree(expression, eofToken, diagnostics);
     }
 
     /**
-     * Parses addition and subtraction
-     * @return The parsed expression
+     * Returns an integer representing the position in the precedence hierarchy. Higher integers should be executed first.
+     * @param syntaxKind The operator token
+     * @return The precedence of the operator
      */
-    @NotNull
-    private ExpressionSyntax parseTerm() {
-        ExpressionSyntax left = parseFactor();
-        while (getCurrent().getSyntaxKind() == SyntaxKind.PlusToken
-                || getCurrent().getSyntaxKind() == SyntaxKind.MinusToken) {
-            SyntaxToken operatorToken = nextToken();
-            ExpressionSyntax right = parseFactor();
-            left = new BinaryExpressionSyntax(left, operatorToken, right);
-        }
-        return left;
+    private static int getBinaryOperatorPrecedence(SyntaxKind syntaxKind) {
+        return switch (syntaxKind) {
+            case PlusToken, MinusToken -> 1;
+            case MultiplyToken, DivideToken, ModuloToken -> 2;
+            default -> 0;
+        };
     }
 
     /**
-     * Parses multiplication and division
-     * @return The parsed expression
+     * Parses an expression
+     * @param parentPrecedence The operator's precedence {@link Parser#getBinaryOperatorPrecedence(SyntaxKind)}
+     * @return The expression
      */
-    @NotNull
-    private ExpressionSyntax parseFactor() {
+    private ExpressionSyntax parseExpression(int parentPrecedence) {
         ExpressionSyntax left = parsePrimaryExpression();
-        while (getCurrent().getSyntaxKind() == SyntaxKind.MultiplyToken
-                || getCurrent().getSyntaxKind() == SyntaxKind.DivideToken
-                || getCurrent().getSyntaxKind() == SyntaxKind.ModuloToken) {
+
+        while (true) {
+            int precedence = getBinaryOperatorPrecedence(getCurrent().getSyntaxKind());
+            if (precedence == 0 || precedence <= parentPrecedence)
+                break;
+
             SyntaxToken operatorToken = nextToken();
-            ExpressionSyntax right = parsePrimaryExpression();
+            ExpressionSyntax right = parseExpression(precedence);
             left = new BinaryExpressionSyntax(left, operatorToken, right);
         }
+
         return left;
+    }
+
+    private ExpressionSyntax parseExpression() {
+        return parseExpression(0);
     }
 
     /**
@@ -155,7 +160,7 @@ public class Parser {
     private @NotNull ExpressionSyntax parsePrimaryExpression() {
         if (getCurrent().getSyntaxKind() == SyntaxKind.OpenBracketToken) {
             SyntaxToken openBracketToken = nextToken();
-            ExpressionSyntax expression = parseTerm();
+            ExpressionSyntax expression = parseExpression();
             SyntaxToken closeBracketToken = match(SyntaxKind.CloseBracketToken);
             return new BracketExpressionSyntax(openBracketToken, expression, closeBracketToken);
         }
