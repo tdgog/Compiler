@@ -32,7 +32,7 @@ public class Parser {
         Lexer lexer = new Lexer(text);
         SyntaxToken token;
         do {
-            token = lexer.nextToken();
+            token = lexer.lex();
 
             if (token.getSyntaxKind() != SyntaxKind.WhitespaceToken
                     && token.getSyntaxKind() != SyntaxKind.BadToken)

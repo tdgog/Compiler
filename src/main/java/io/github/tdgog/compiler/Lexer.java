@@ -47,7 +47,7 @@ public class Lexer {
      * Get the next syntax token
      * @return The next syntax token
      */
-    public SyntaxToken nextToken() {
+    public SyntaxToken lex() {
         // If the end of the expression has been reached, return an EOF token
         if (position >= text.length())
             return new SyntaxToken(SyntaxKind.EOFToken, position, "\0", null);
