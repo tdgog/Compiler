@@ -4,7 +4,6 @@ package io.github.tdgog.compiler.Syntax;
  * The types of tokens and expressions in the language.
  */
 public enum SyntaxKind {
-    StringToken,
     IntegerToken,
     FloatToken,
     PlusToken,
@@ -15,9 +14,9 @@ public enum SyntaxKind {
     CloseBracketToken,
     BadToken,
     EOFToken,
-    IntegerExpression,
-    FloatExpression,
     BinaryExpression,
     BracketExpression,
-    ModuloToken, LiteralExpression, WhitespaceToken
+    ModuloToken,
+    LiteralExpression,
+    WhitespaceToken
 }
