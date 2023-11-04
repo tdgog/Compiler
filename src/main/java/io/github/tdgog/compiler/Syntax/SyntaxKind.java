@@ -21,5 +21,19 @@ public enum SyntaxKind {
     // Expressions
     BinaryExpression,
     BracketExpression,
-    LiteralExpression
+    LiteralExpression;
+
+    /**
+     * Returns an integer representing the position in the precedence hierarchy.
+     * Higher integers should be executed first.
+     * @return The precedence of the operator
+     */
+    public int getBinaryOperatorPrecedence() {
+        return switch (this) {
+            case PlusToken, MinusToken -> 1;
+            case MultiplyToken, DivideToken, ModuloToken -> 2;
+            default -> 0;
+        };
+    }
+
 }

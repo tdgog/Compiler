@@ -116,28 +116,15 @@ public class Parser {
     }
 
     /**
-     * Returns an integer representing the position in the precedence hierarchy. Higher integers should be executed first.
-     * @param syntaxKind The operator token
-     * @return The precedence of the operator
-     */
-    private static int getBinaryOperatorPrecedence(SyntaxKind syntaxKind) {
-        return switch (syntaxKind) {
-            case PlusToken, MinusToken -> 1;
-            case MultiplyToken, DivideToken, ModuloToken -> 2;
-            default -> 0;
-        };
-    }
-
-    /**
      * Parses an expression
-     * @param parentPrecedence The operator's precedence {@link Parser#getBinaryOperatorPrecedence(SyntaxKind)}
+     * @param parentPrecedence The operator's precedence {@link io.github.tdgog.compiler.Syntax.SyntaxKind#getBinaryOperatorPrecedence()}
      * @return The expression
      */
     private ExpressionSyntax parseExpression(int parentPrecedence) {
         ExpressionSyntax left = parsePrimaryExpression();
 
         while (true) {
-            int precedence = getBinaryOperatorPrecedence(getCurrent().getSyntaxKind());
+            int precedence = getCurrent().getSyntaxKind().getBinaryOperatorPrecedence();
             if (precedence == 0 || precedence <= parentPrecedence)
                 break;
 
