@@ -15,7 +15,7 @@ public class Parser {
     private final SyntaxToken[] tokens;
     private int position;
     @Getter
-    private ArrayList<String> diagnostics = new ArrayList<>();
+    private final ArrayList<String> diagnostics = new ArrayList<>();
 
     public Parser(String text) {
         this.tokens = lex(text);

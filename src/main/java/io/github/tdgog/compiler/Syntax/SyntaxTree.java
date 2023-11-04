@@ -13,9 +13,9 @@ import java.util.List;
 @Getter
 public class SyntaxTree {
 
-    private ExpressionSyntax root;
-    private SyntaxToken eofToken;
-    private List<String> diagnostics;
+    private final ExpressionSyntax root;
+    private final SyntaxToken eofToken;
+    private final List<String> diagnostics;
 
     public SyntaxTree(ExpressionSyntax root, SyntaxToken eofToken, List<String> diagnostics) {
         this.root = root;

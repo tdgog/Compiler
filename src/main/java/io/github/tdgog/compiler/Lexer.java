@@ -11,7 +11,7 @@ public class Lexer {
     private final String text;
     private int position;
     @Getter
-    private ArrayList<String> diagnostics = new ArrayList<>();
+    private final ArrayList<String> diagnostics = new ArrayList<>();
     
     public Lexer(String text) {
         this.text = text;

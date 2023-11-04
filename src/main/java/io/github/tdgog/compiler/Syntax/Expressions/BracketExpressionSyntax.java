@@ -15,10 +15,10 @@ import java.util.Arrays;
 @AllArgsConstructor
 public class BracketExpressionSyntax extends ExpressionSyntax {
 
-    SyntaxToken openBracketToken;
+    private final SyntaxToken openBracketToken;
     @Getter
-    ExpressionSyntax expression;
-    SyntaxToken closeBracketToken;
+    private final ExpressionSyntax expression;
+    private final SyntaxToken closeBracketToken;
 
     @Override
     public SyntaxKind getSyntaxKind() {
