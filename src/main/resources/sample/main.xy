@@ -1,0 +1,13 @@
+// Lang name      : Xylo
+// Lang extension : .xy
+
+import io::Scanner;
+
+void main() {
+    // This is a comment
+    /* This is a multiline comment */
+    Scanner scanner = new Scanner(io::stdin);
+    int age = scanner.nextInt("Enter your age: ");
+    age += 5;
+    io::println("In 5 years you will be $age years old.")
+}
