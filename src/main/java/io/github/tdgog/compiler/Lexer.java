@@ -54,13 +54,11 @@ public class Lexer {
 
         // If the current character is a digit, return a number token
         if (Character.isDigit(getCurrentCharacter())
-                || (getCurrentCharacter() == '-' && Character.isDigit(getCharacterAtPosition(position + 1)))
                 || (getCurrentCharacter() == '.' && Character.isDigit(getCharacterAtPosition(position + 1)))) {
 
             boolean dotFound = false;
             int start = position;
             while (Character.isDigit(getCurrentCharacter())
-                    || (getCurrentCharacter() == '-' && Character.isDigit(getCharacterAtPosition(position + 1)))
                     || (getCurrentCharacter() == '.' && Character.isDigit(getCharacterAtPosition(position + 1)))) {
                 // Only permit a single decimal character
                 if (getCurrentCharacter() == '.') {
@@ -69,12 +67,6 @@ public class Lexer {
                         break;
                     }
                     dotFound = true;
-                }
-
-                // Only permit a single minus sign and only let that be at the start
-                if (getCurrentCharacter() == '-' && start != position) {
-                    next();
-                    break;
                 }
 
                 next();

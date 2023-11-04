@@ -4,6 +4,7 @@ package io.github.tdgog.compiler.Syntax;
  * The types of tokens and expressions in the language.
  */
 public enum SyntaxKind {
+
     // Tokens
     BadToken,
     EOFToken,
@@ -19,6 +20,7 @@ public enum SyntaxKind {
     CloseBracketToken,
 
     // Expressions
+    UnaryExpression,
     BinaryExpression,
     BracketExpression,
     LiteralExpression;
@@ -32,6 +34,18 @@ public enum SyntaxKind {
         return switch (this) {
             case PlusToken, MinusToken -> 1;
             case MultiplyToken, DivideToken, ModuloToken -> 2;
+            default -> 0;
+        };
+    }
+
+    /**
+     * Returns an integer representing the position in the precedence hierarchy.
+     * Higher integers should be executed first.
+     * @return The precedence of the operator
+     */
+    public int getUnaryOperatorPrecedence() {
+        return switch (this) {
+            case PlusToken, MinusToken -> 3;
             default -> 0;
         };
     }

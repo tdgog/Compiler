@@ -121,8 +121,15 @@ public class Parser {
      * @return The expression
      */
     private ExpressionSyntax parseExpression(int parentPrecedence) {
-        ExpressionSyntax left = parsePrimaryExpression();
+        // Parse unary expressions
+        ExpressionSyntax left;
+        int unaryOperatorPrecedence = getCurrent().getSyntaxKind().getUnaryOperatorPrecedence();
+        if (unaryOperatorPrecedence != 0 && unaryOperatorPrecedence >= parentPrecedence)
+            left = new UnaryExpressionSyntax(nextToken(), parseExpression(unaryOperatorPrecedence));
+        else
+            left = parsePrimaryExpression();
 
+        // Parse binary expressions
         while (true) {
             int precedence = getCurrent().getSyntaxKind().getBinaryOperatorPrecedence();
             if (precedence == 0 || precedence <= parentPrecedence)

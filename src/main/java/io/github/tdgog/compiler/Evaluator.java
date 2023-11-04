@@ -1,6 +1,7 @@
 package io.github.tdgog.compiler;
 
 import io.github.tdgog.compiler.Syntax.Expressions.*;
+import io.github.tdgog.compiler.Syntax.SyntaxKind;
 import lombok.AllArgsConstructor;
 
 /**
@@ -23,6 +24,19 @@ public class Evaluator {
     private Number evaluateExpression(ExpressionSyntax root) {
         if (root instanceof LiteralExpressionSyntax expression)
             return (Number) expression.getToken().getValue();
+        else if (root instanceof UnaryExpressionSyntax expression) {
+            Number operand = evaluateExpression(expression.getOperand());
+            SyntaxKind syntaxKind = expression.getOperatorToken().getSyntaxKind();
+            if (syntaxKind == SyntaxKind.PlusToken)
+                return operand;
+            else if (syntaxKind == SyntaxKind.MinusToken) {
+                if (operand instanceof Double o)
+                    return -o;
+                if (operand instanceof Integer o)
+                    return -o;
+            }
+            throw new RuntimeException("Unexpected unary operator " + syntaxKind);
+        }
         else if (root instanceof BinaryExpressionSyntax expression) {
             Number leftExpression = evaluateExpression(expression.getLeft());
             Number rightExpression = evaluateExpression(expression.getRight());

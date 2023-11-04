@@ -22,9 +22,6 @@ public final class TokenDatatypeChecker {
      * @return Whether the string is a valid integer
      */
     public static boolean isInteger(@NotNull String string) {
-        if (string.charAt(0) == '-')
-            string = string.substring(1);
-
         if (string.contains("."))
             return false;
 
@@ -32,9 +29,6 @@ public final class TokenDatatypeChecker {
     }
 
     public static boolean isFloat(@NotNull String string) {
-        if (string.charAt(0) == '-')
-            string = string.substring(1);
-
         if (string.charAt(0) == '.')
             string = '0' + string;
 
