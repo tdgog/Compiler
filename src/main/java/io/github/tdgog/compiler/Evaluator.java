@@ -21,9 +21,7 @@ public class Evaluator {
      * @return The resulting value
      */
     private Number evaluateExpression(ExpressionSyntax root) {
-        if (root instanceof IntegerExpressionSyntax expression)
-            return (Number) expression.getToken().getValue();
-        if (root instanceof FloatExpressionSyntax expression)
+        if (root instanceof LiteralExpressionSyntax expression)
             return (Number) expression.getToken().getValue();
         else if (root instanceof BinaryExpressionSyntax expression) {
             Number leftExpression = evaluateExpression(expression.getLeft());

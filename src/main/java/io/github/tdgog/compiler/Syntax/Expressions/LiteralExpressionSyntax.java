@@ -10,17 +10,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Represents a single floating point number.
+ * Represents a single literal value.
  */
 @Getter
 @AllArgsConstructor
-public final class FloatExpressionSyntax extends ExpressionSyntax {
+public final class LiteralExpressionSyntax extends ExpressionSyntax {
 
     private final SyntaxToken token;
 
     @Override
     public SyntaxKind getSyntaxKind() {
-        return SyntaxKind.FloatExpression;
+        return SyntaxKind.LiteralExpression;
     }
 
     @Override

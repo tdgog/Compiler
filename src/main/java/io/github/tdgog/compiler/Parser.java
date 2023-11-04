@@ -7,7 +7,6 @@ import io.github.tdgog.compiler.Syntax.SyntaxTree;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 
@@ -163,10 +162,9 @@ public class Parser {
 
         SyntaxToken token = match(new SyntaxKind[]{SyntaxKind.IntegerToken, SyntaxKind.FloatToken});
         return switch (token.getSyntaxKind()) {
-            case IntegerToken -> new IntegerExpressionSyntax(token);
-            case FloatToken -> new FloatExpressionSyntax(token);
+            case IntegerToken, FloatToken -> new LiteralExpressionSyntax(token);
             // Temp
-            default -> new IntegerExpressionSyntax(token);
+            default -> new LiteralExpressionSyntax(token);
         };
 
     }

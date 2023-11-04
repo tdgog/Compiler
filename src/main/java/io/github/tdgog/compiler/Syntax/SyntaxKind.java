@@ -19,5 +19,5 @@ public enum SyntaxKind {
     FloatExpression,
     BinaryExpression,
     BracketExpression,
-    ModuloToken, WhitespaceToken
+    ModuloToken, LiteralExpression, WhitespaceToken
 }
