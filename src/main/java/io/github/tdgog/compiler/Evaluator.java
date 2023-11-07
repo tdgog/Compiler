@@ -1,16 +1,15 @@
 package io.github.tdgog.compiler;
 
-import io.github.tdgog.compiler.Syntax.Expressions.*;
-import io.github.tdgog.compiler.Syntax.SyntaxKind;
+import io.github.tdgog.compiler.Binder.*;
 import lombok.AllArgsConstructor;
 
 /**
  * Evaluates numeric expressions
  */
 @AllArgsConstructor
-public class Evaluator {
+public final class Evaluator {
 
-    private final ExpressionSyntax root;
+    private final BoundExpression root;
 
     public Number evaluate() {
         return evaluateExpression(root);
@@ -21,23 +20,25 @@ public class Evaluator {
      * @param root The parent node of the expression
      * @return The resulting value
      */
-    private Number evaluateExpression(ExpressionSyntax root) {
-        if (root instanceof LiteralExpressionSyntax expression)
-            return (Number) expression.getToken().getValue();
-        else if (root instanceof UnaryExpressionSyntax expression) {
+    private Number evaluateExpression(BoundExpression root) {
+        if (root instanceof BoundLiteralExpression expression)
+            return (Number) expression.getValue();
+        else if (root instanceof BoundUnaryExpression expression) {
             Number operand = evaluateExpression(expression.getOperand());
-            SyntaxKind syntaxKind = expression.getOperatorToken().getSyntaxKind();
-            if (syntaxKind == SyntaxKind.PlusToken)
+            BoundUnaryOperatorKind syntaxKind = expression.getOperatorKind();
+
+            if (syntaxKind == BoundUnaryOperatorKind.Identity)
                 return operand;
-            else if (syntaxKind == SyntaxKind.MinusToken) {
+            else if (syntaxKind == BoundUnaryOperatorKind.Negation) {
                 if (operand instanceof Double o)
                     return -o;
                 if (operand instanceof Integer o)
                     return -o;
             }
+
             throw new RuntimeException("Unexpected unary operator " + syntaxKind);
         }
-        else if (root instanceof BinaryExpressionSyntax expression) {
+        else if (root instanceof BoundBinaryExpression expression) {
             Number leftExpression = evaluateExpression(expression.getLeft());
             Number rightExpression = evaluateExpression(expression.getRight());
 
@@ -45,13 +46,12 @@ public class Evaluator {
                 double left = leftExpression.doubleValue();
                 double right = rightExpression.doubleValue();
 
-                return switch (expression.getOperatorToken().getSyntaxKind()) {
-                    case PlusToken -> left + right;
-                    case MinusToken -> left - right;
-                    case MultiplyToken -> left * right;
-                    case DivideToken -> left / right;
-                    default ->
-                            throw new RuntimeException("Unexpected binary operator " + expression.getOperatorToken().getSyntaxKind());
+                return switch (expression.getOperatorKind()) {
+                    case Addition -> left + right;
+                    case Subtraction -> left - right;
+                    case Multiplication -> left * right;
+                    case Division -> left / right;
+                    default -> throw new RuntimeException("Unexpected binary operator " + expression.getOperatorKind());
                 };
             }
 
@@ -59,21 +59,18 @@ public class Evaluator {
                 int left = leftExpression.intValue();
                 int right = rightExpression.intValue();
 
-                return switch (expression.getOperatorToken().getSyntaxKind()) {
-                    case PlusToken -> left + right;
-                    case MinusToken -> left - right;
-                    case MultiplyToken -> left * right;
-                    case DivideToken -> left / right;
-                    case ModuloToken -> left % right;
-                    default ->
-                            throw new RuntimeException("Unexpected binary operator " + expression.getOperatorToken().getSyntaxKind());
+                return switch (expression.getOperatorKind()) {
+                    case Addition -> left + right;
+                    case Subtraction -> left - right;
+                    case Multiplication -> left * right;
+                    case Division -> left / right;
+                    case Modulo -> left % right;
                 };
             }
 
-        } else if (root instanceof BracketExpressionSyntax expression)
-            return evaluateExpression(expression.getExpression());
+        }
 
-        throw new RuntimeException("Unexpected node " + root.getSyntaxKind());
+        throw new RuntimeException("Unexpected node " + root.getBoundNodeKind());
     }
 
 }

@@ -1,11 +1,15 @@
 package io.github.tdgog.compiler;
 
+import io.github.tdgog.compiler.Binder.Binder;
+import io.github.tdgog.compiler.Binder.BoundExpression;
 import io.github.tdgog.compiler.Colors.Colors;
 import io.github.tdgog.compiler.Syntax.SyntaxNode;
 import io.github.tdgog.compiler.Syntax.SyntaxToken;
 import io.github.tdgog.compiler.Syntax.SyntaxTree;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -34,19 +38,30 @@ public class Compiler {
                 continue;
             }
 
-            // Parse and print the syntax tree
+            // Parse the line into a bound syntax tree
             SyntaxTree syntaxTree = SyntaxTree.parse(line);
+            Binder binder = new Binder();
+            BoundExpression boundExpression = binder.bindExpression(syntaxTree.getRoot());
+
+            // Get the diagnostics from the parser & binder
+            List<String> diagnostics = new ArrayList<>();
+            diagnostics.addAll(syntaxTree.getDiagnostics());
+            diagnostics.addAll(binder.getDiagnostics());
+
+            // Display the syntax tree
             if (showTree)
                 prettyPrint(syntaxTree.getRoot());
 
-            if (!syntaxTree.getDiagnostics().isEmpty()) {
+            // If any errors were found, display them
+            // Otherwise, execute the line
+            if (!diagnostics.isEmpty()) {
                 System.out.println(Colors.Foreground.ANSI_RED);
-                for (String diagnostic : syntaxTree.getDiagnostics())
+                for (String diagnostic : diagnostics)
                     System.out.println(diagnostic);
                 System.out.println(Colors.ANSI_RESET);
             } else {
                 // Evaluate the syntax tree
-                Evaluator evaluator = new Evaluator(syntaxTree.getRoot());
+                Evaluator evaluator = new Evaluator(boundExpression);
                 Number result = evaluator.evaluate();
                 System.out.println(result);
             }
