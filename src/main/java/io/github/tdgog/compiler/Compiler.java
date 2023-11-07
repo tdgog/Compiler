@@ -2,10 +2,10 @@ package io.github.tdgog.compiler;
 
 import io.github.tdgog.compiler.Binder.Binder;
 import io.github.tdgog.compiler.Binder.BoundExpression;
-import io.github.tdgog.compiler.Colors.Colors;
-import io.github.tdgog.compiler.Syntax.SyntaxNode;
-import io.github.tdgog.compiler.Syntax.SyntaxToken;
-import io.github.tdgog.compiler.Syntax.SyntaxTree;
+import io.github.tdgog.compiler.TreeParser.Colors.Colors;
+import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxNode;
+import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
+import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxTree;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

@@ -1,8 +1,8 @@
-package io.github.tdgog.compiler.Syntax.Expressions;
+package io.github.tdgog.compiler.TreeParser.Syntax.Expressions;
 
-import io.github.tdgog.compiler.Syntax.SyntaxKind;
-import io.github.tdgog.compiler.Syntax.SyntaxNode;
-import io.github.tdgog.compiler.Syntax.SyntaxToken;
+import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
+import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxNode;
+import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

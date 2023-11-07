@@ -1,7 +1,7 @@
-package io.github.tdgog.compiler.Syntax;
+package io.github.tdgog.compiler.TreeParser.Syntax;
 
-import io.github.tdgog.compiler.Parser;
-import io.github.tdgog.compiler.Syntax.Expressions.ExpressionSyntax;
+import io.github.tdgog.compiler.TreeParser.Parser;
+import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.ExpressionSyntax;
 import lombok.Getter;
 
 import java.util.Collections;

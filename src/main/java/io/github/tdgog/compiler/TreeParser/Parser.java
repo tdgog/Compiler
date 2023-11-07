@@ -1,9 +1,9 @@
-package io.github.tdgog.compiler;
+package io.github.tdgog.compiler.TreeParser;
 
-import io.github.tdgog.compiler.Syntax.Expressions.*;
-import io.github.tdgog.compiler.Syntax.SyntaxKind;
-import io.github.tdgog.compiler.Syntax.SyntaxToken;
-import io.github.tdgog.compiler.Syntax.SyntaxTree;
+import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.*;
+import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
+import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
+import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxTree;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -117,7 +117,7 @@ public class Parser {
 
     /**
      * Parses an expression
-     * @param parentPrecedence The operator's precedence {@link io.github.tdgog.compiler.Syntax.SyntaxKind#getBinaryOperatorPrecedence()}
+     * @param parentPrecedence The operator's precedence {@link io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind#getBinaryOperatorPrecedence()}
      * @return The expression
      */
     private ExpressionSyntax parseExpression(int parentPrecedence) {

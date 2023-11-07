@@ -1,4 +1,4 @@
-package io.github.tdgog.compiler;
+package io.github.tdgog.compiler.TreeParser;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

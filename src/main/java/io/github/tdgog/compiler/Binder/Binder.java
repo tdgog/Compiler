@@ -1,10 +1,10 @@
 package io.github.tdgog.compiler.Binder;
 
-import io.github.tdgog.compiler.Syntax.Expressions.BinaryExpressionSyntax;
-import io.github.tdgog.compiler.Syntax.Expressions.ExpressionSyntax;
-import io.github.tdgog.compiler.Syntax.Expressions.LiteralExpressionSyntax;
-import io.github.tdgog.compiler.Syntax.Expressions.UnaryExpressionSyntax;
-import io.github.tdgog.compiler.Syntax.SyntaxKind;
+import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.BinaryExpressionSyntax;
+import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.ExpressionSyntax;
+import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.LiteralExpressionSyntax;
+import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.UnaryExpressionSyntax;
+import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
 import lombok.Getter;
 
 import java.util.ArrayList;

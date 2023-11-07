@@ -1,4 +1,4 @@
-package io.github.tdgog.compiler.Syntax;
+package io.github.tdgog.compiler.TreeParser.Syntax;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
