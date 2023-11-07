@@ -28,7 +28,7 @@ public final class Binder {
     }
 
     private BoundExpression bindLiteralExpression(LiteralExpressionSyntax syntax) {
-        Object value = syntax.getToken().getValue();
+        Object value = syntax.getValue();
         int castValue = (value instanceof Integer) ? (int) value : 0;
         return new BoundLiteralExpression(castValue);
     }

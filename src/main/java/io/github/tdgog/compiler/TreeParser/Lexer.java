@@ -96,6 +96,18 @@ public class Lexer {
             return new SyntaxToken(SyntaxKind.WhitespaceToken, start, value, null);
         }
 
+        if (Character.isLetter(getCurrentCharacter())) {
+            int start = position;
+            while (Character.isLetter(getCurrentCharacter())) {
+                next();
+            }
+
+            int length = position - start;
+            String value = text.substring(start, start + length);
+            SyntaxKind syntaxKind = SyntaxKind.getKeywordKind(value);
+            return new SyntaxToken(syntaxKind, start, value, null);
+        }
+
         // If the current character is a symbol, return the token for that symbol
         switch (getCurrentCharacter()) {
             case '+':

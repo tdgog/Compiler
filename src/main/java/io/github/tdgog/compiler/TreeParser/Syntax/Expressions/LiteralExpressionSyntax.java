@@ -17,6 +17,12 @@ import java.util.Arrays;
 public final class LiteralExpressionSyntax extends ExpressionSyntax {
 
     private final SyntaxToken token;
+    private final Object value;
+
+    public LiteralExpressionSyntax(SyntaxToken token) {
+        this.token = token;
+        this.value = token.getValue();
+    }
 
     @Override
     public SyntaxKind getSyntaxKind() {
