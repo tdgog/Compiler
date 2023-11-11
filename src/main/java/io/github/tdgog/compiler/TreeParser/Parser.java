@@ -152,20 +152,26 @@ public class Parser {
      * @return The primary expression
      */
     private @NotNull ExpressionSyntax parsePrimaryExpression() {
-        if (getCurrent().getSyntaxKind() == SyntaxKind.OpenBracketToken) {
-            SyntaxToken openBracketToken = nextToken();
-            ExpressionSyntax expression = parseExpression();
-            SyntaxToken closeBracketToken = match(SyntaxKind.CloseBracketToken);
-            return new BracketExpressionSyntax(openBracketToken, expression, closeBracketToken);
+        switch (getCurrent().getSyntaxKind()) {
+            case OpenBracketToken -> {
+                SyntaxToken openBracketToken = nextToken();
+                ExpressionSyntax expression = parseExpression();
+                SyntaxToken closeBracketToken = match(SyntaxKind.CloseBracketToken);
+                return new BracketExpressionSyntax(openBracketToken, expression, closeBracketToken);
+            }
+            case TrueKeyword, FalseKeyword -> {
+                Boolean value = getCurrent().getSyntaxKind() == SyntaxKind.TrueKeyword;
+                return new LiteralExpressionSyntax(nextToken(), value);
+            }
+            default -> {
+                SyntaxToken token = match(new SyntaxKind[]{SyntaxKind.IntegerToken, SyntaxKind.FloatToken});
+                return switch (token.getSyntaxKind()) {
+                    case IntegerToken, FloatToken -> new LiteralExpressionSyntax(token);
+                    // Temp
+                    default -> new LiteralExpressionSyntax(token);
+                };
+            }
         }
-
-        SyntaxToken token = match(new SyntaxKind[]{SyntaxKind.IntegerToken, SyntaxKind.FloatToken});
-        return switch (token.getSyntaxKind()) {
-            case IntegerToken, FloatToken -> new LiteralExpressionSyntax(token);
-            // Temp
-            default -> new LiteralExpressionSyntax(token);
-        };
-
     }
 
 }

@@ -18,12 +18,17 @@ public enum SyntaxKind {
     ModuloToken,
     OpenBracketToken,
     CloseBracketToken,
+    IdentifierToken,
 
     // Expressions
     UnaryExpression,
     BinaryExpression,
     BracketExpression,
-    LiteralExpression;
+    LiteralExpression,
+
+    // Keywords
+    TrueKeyword,
+    FalseKeyword;
 
     /**
      * Returns an integer representing the position in the precedence hierarchy.
@@ -47,6 +52,14 @@ public enum SyntaxKind {
         return switch (this) {
             case PlusToken, MinusToken -> 3;
             default -> 0;
+        };
+    }
+
+    public static SyntaxKind getKeywordKind(String string) {
+        return switch (string) {
+            case "true" -> SyntaxKind.TrueKeyword;
+            case "false" -> SyntaxKind.FalseKeyword;
+            default -> SyntaxKind.IdentifierToken;
         };
     }
 

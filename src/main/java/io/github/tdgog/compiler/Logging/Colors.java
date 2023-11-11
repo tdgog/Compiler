@@ -1,4 +1,4 @@
-package io.github.tdgog.compiler.TreeParser.Colors;
+package io.github.tdgog.compiler.Logging;
 
 /**
  * Stores all ANSI colors that can be printed to the terminal

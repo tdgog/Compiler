@@ -1,5 +1,6 @@
 package io.github.tdgog.compiler.Binder;
 
+import io.github.tdgog.compiler.Logging.ClassNameConverter;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.BinaryExpressionSyntax;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.ExpressionSyntax;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.LiteralExpressionSyntax;
@@ -9,6 +10,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Used to walk the syntax tree and aid in type checking
@@ -28,9 +30,8 @@ public final class Binder {
     }
 
     private BoundExpression bindLiteralExpression(LiteralExpressionSyntax syntax) {
-        Object value = syntax.getToken().getValue();
-        int castValue = (value instanceof Integer) ? (int) value : 0;
-        return new BoundLiteralExpression(castValue);
+        Object value = syntax.getValue();
+        return new BoundLiteralExpression(Objects.requireNonNullElse(value, 0));
     }
 
     private BoundExpression bindUnaryExpression(UnaryExpressionSyntax syntax) {
@@ -38,7 +39,7 @@ public final class Binder {
         BoundUnaryOperatorKind operatorKind = bindUnaryOperatorKind(syntax.getOperatorToken().getSyntaxKind(), operand.getType());
 
         if (operatorKind == null) {
-            diagnostics.add("Unary operator '" + syntax.getOperatorToken().getText() + "' is not defined for type " + operand.getType() + ".");
+            diagnostics.add("Unary operator '" + syntax.getOperatorToken().getText() + "' is not defined for type " + ClassNameConverter.toFriendlyName((Class<?>) operand.getType()) + ".");
             return operand;
         }
 
@@ -51,7 +52,7 @@ public final class Binder {
         BoundBinaryOperatorKind operatorKind = bindBinaryOperatorKind(syntax.getOperatorToken().getSyntaxKind(), left.getType(), right.getType());
 
         if (operatorKind == null) {
-            diagnostics.add("Binary operator '" + syntax.getOperatorToken().getText() + "' is not defined for types " + left.getType() + " and " + right.getType() + ".");
+            diagnostics.add("Binary operator '" + syntax.getOperatorToken().getText() + "' is not defined for types " + ClassNameConverter.toFriendlyName((Class<?>) left.getType()) + " and " + ClassNameConverter.toFriendlyName((Class<?>) right.getType()) + ".");
             return left;
         }
 
