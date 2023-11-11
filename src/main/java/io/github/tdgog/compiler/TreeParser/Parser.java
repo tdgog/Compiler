@@ -86,7 +86,7 @@ public class Parser {
             return nextToken();
 
         diagnostics.add("ERROR: Unexpected token <" + getCurrent().getSyntaxKind() + ">, expected <" + kind + ">.");
-        return new SyntaxToken(kind, getCurrent().getPosition(), null, null);
+        return new SyntaxToken(kind, getCurrent().getPosition(), null);
     }
 
     private SyntaxToken match(SyntaxKind[] kinds) {
@@ -102,7 +102,7 @@ public class Parser {
         }
 
         diagnostics.add("ERROR: Unexpected token <" + getCurrent().getSyntaxKind() + ">, expected " + expectedKinds + ".");
-        return new SyntaxToken(kinds[0], getCurrent().getPosition(), null, null);
+        return new SyntaxToken(kinds[0], getCurrent().getPosition(), null);
     }
 
     /**

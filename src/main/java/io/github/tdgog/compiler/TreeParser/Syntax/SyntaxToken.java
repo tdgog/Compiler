@@ -17,6 +17,16 @@ public class SyntaxToken extends SyntaxNode {
     private final String text;
     private final Object value;
 
+    /**
+     * Alternative constructor with the default value of null
+     * @param syntaxKind The type of token
+     * @param position The index of the token
+     * @param text The content of the token
+     */
+    public SyntaxToken(SyntaxKind syntaxKind, int position, String text) {
+        this(syntaxKind, position, text, null);
+    }
+
     @Override
     public ArrayList<SyntaxNode> getChildren() {
         return new ArrayList<>();

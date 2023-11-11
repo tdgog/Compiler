@@ -50,7 +50,7 @@ public class Lexer {
     public SyntaxToken lex() {
         // If the end of the expression has been reached, return an EOF token
         if (position >= text.length())
-            return new SyntaxToken(SyntaxKind.EOFToken, position, "\0", null);
+            return new SyntaxToken(SyntaxKind.EOFToken, position, "\0");
 
         // If the current character is a digit, return a number token
         if (Character.isDigit(getCurrentCharacter())
@@ -93,7 +93,7 @@ public class Lexer {
             int length = position - start;
             String value = text.substring(start, start + length);
 
-            return new SyntaxToken(SyntaxKind.WhitespaceToken, start, value, null);
+            return new SyntaxToken(SyntaxKind.WhitespaceToken, start, value);
         }
 
         if (Character.isLetter(getCurrentCharacter())) {
@@ -105,30 +105,30 @@ public class Lexer {
             int length = position - start;
             String value = text.substring(start, start + length);
             SyntaxKind syntaxKind = SyntaxKind.getKeywordKind(value);
-            return new SyntaxToken(syntaxKind, start, value, null);
+            return new SyntaxToken(syntaxKind, start, value);
         }
 
         // If the current character is a symbol, return the token for that symbol
         switch (getCurrentCharacter()) {
             case '+':
-                return new SyntaxToken(SyntaxKind.PlusToken, position++, "+", null);
+                return new SyntaxToken(SyntaxKind.PlusToken, position++, "+");
             case '-':
-                return new SyntaxToken(SyntaxKind.MinusToken, position++, "-", null);
+                return new SyntaxToken(SyntaxKind.MinusToken, position++, "-");
             case '*':
-                return new SyntaxToken(SyntaxKind.MultiplyToken, position++, "*", null);
+                return new SyntaxToken(SyntaxKind.MultiplyToken, position++, "*");
             case '/':
-                return new SyntaxToken(SyntaxKind.DivideToken, position++, "/", null);
+                return new SyntaxToken(SyntaxKind.DivideToken, position++, "/");
             case '(':
-                return new SyntaxToken(SyntaxKind.OpenBracketToken, position++, "(", null);
+                return new SyntaxToken(SyntaxKind.OpenBracketToken, position++, "(");
             case ')':
-                return new SyntaxToken(SyntaxKind.CloseBracketToken, position++, ")", null);
+                return new SyntaxToken(SyntaxKind.CloseBracketToken, position++, ")");
             case '%':
-                return new SyntaxToken(SyntaxKind.ModuloToken, position++, "%", null);
+                return new SyntaxToken(SyntaxKind.ModuloToken, position++, "%");
         }
 
         // Return a bad token if the current character is not part of a valid token
         diagnostics.add("ERROR: Bad character input: '" + getCurrentCharacter() + "'");
-        return new SyntaxToken(SyntaxKind.BadToken, position++, text.substring(position - 1, position), null);
+        return new SyntaxToken(SyntaxKind.BadToken, position++, text.substring(position - 1, position));
     }
 
 }
