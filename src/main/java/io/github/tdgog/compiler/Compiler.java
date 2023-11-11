@@ -2,7 +2,7 @@ package io.github.tdgog.compiler;
 
 import io.github.tdgog.compiler.Binder.Binder;
 import io.github.tdgog.compiler.Binder.BoundExpression;
-import io.github.tdgog.compiler.TreeParser.Colors.Colors;
+import io.github.tdgog.compiler.Logging.Colors;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxNode;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxTree;
@@ -62,7 +62,7 @@ public class Compiler {
             } else {
                 // Evaluate the syntax tree
                 Evaluator evaluator = new Evaluator(boundExpression);
-                Number result = evaluator.evaluate();
+                Object result = evaluator.evaluate();
                 System.out.println(result);
             }
         }

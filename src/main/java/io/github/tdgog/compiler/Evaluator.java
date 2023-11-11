@@ -11,7 +11,7 @@ public final class Evaluator {
 
     private final BoundExpression root;
 
-    public Number evaluate() {
+    public Object evaluate() {
         return evaluateExpression(root);
     }
 
@@ -20,11 +20,11 @@ public final class Evaluator {
      * @param root The parent node of the expression
      * @return The resulting value
      */
-    private Number evaluateExpression(BoundExpression root) {
+    private Object evaluateExpression(BoundExpression root) {
         if (root instanceof BoundLiteralExpression expression)
-            return (Number) expression.getValue();
+            return expression.getValue();
         else if (root instanceof BoundUnaryExpression expression) {
-            Number operand = evaluateExpression(expression.getOperand());
+            Object operand = evaluateExpression(expression.getOperand());
             BoundUnaryOperatorKind syntaxKind = expression.getOperatorKind();
 
             if (syntaxKind == BoundUnaryOperatorKind.Identity)
@@ -39,8 +39,8 @@ public final class Evaluator {
             throw new RuntimeException("Unexpected unary operator " + syntaxKind);
         }
         else if (root instanceof BoundBinaryExpression expression) {
-            Number leftExpression = evaluateExpression(expression.getLeft());
-            Number rightExpression = evaluateExpression(expression.getRight());
+            Number leftExpression = (Number) evaluateExpression(expression.getLeft());
+            Number rightExpression = (Number) evaluateExpression(expression.getRight());
 
             if (leftExpression instanceof Double || rightExpression instanceof Double) {
                 double left = leftExpression.doubleValue();
