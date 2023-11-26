@@ -30,8 +30,7 @@ public final class Binder {
     }
 
     private BoundExpression bindLiteralExpression(LiteralExpressionSyntax syntax) {
-        Object value = syntax.getValue();
-        return new BoundLiteralExpression(Objects.requireNonNullElse(value, 0));
+        return new BoundLiteralExpression(Objects.requireNonNullElse(syntax.getValue(), 0));
     }
 
     private BoundExpression bindUnaryExpression(UnaryExpressionSyntax syntax) {
@@ -60,28 +59,38 @@ public final class Binder {
     }
 
     private BoundUnaryOperatorKind bindUnaryOperatorKind(SyntaxKind syntaxKind, Object operandType) {
-        if (!(operandType instanceof Integer))
-            return null;
+        if (operandType == Integer.class || operandType == Double.class)
+            return switch (syntaxKind) {
+                case PlusToken -> BoundUnaryOperatorKind.Identity;
+                case MinusToken -> BoundUnaryOperatorKind.Negation;
+                default -> throw new RuntimeException("Unexpected unary operator " + syntaxKind);
+            };
 
-        return switch (syntaxKind) {
-            case PlusToken -> BoundUnaryOperatorKind.Identity;
-            case MinusToken -> BoundUnaryOperatorKind.Negation;
-            default -> throw new RuntimeException("Unexpected unary operator " + syntaxKind);
-        };
+        if (operandType == Boolean.class && syntaxKind == SyntaxKind.BangToken)
+            return BoundUnaryOperatorKind.LogicalNegation;
+
+        return null;
     }
 
     private BoundBinaryOperatorKind bindBinaryOperatorKind(SyntaxKind syntaxKind, Object leftType, Object rightType) {
-        if (leftType != Integer.class || rightType != Integer.class)
-            return null;
+        if (leftType == Integer.class && rightType == Integer.class)
+            return switch (syntaxKind) {
+                case PlusToken -> BoundBinaryOperatorKind.Addition;
+                case MinusToken -> BoundBinaryOperatorKind.Subtraction;
+                case MultiplyToken -> BoundBinaryOperatorKind.Multiplication;
+                case DivideToken -> BoundBinaryOperatorKind.Division;
+                case ModuloToken -> BoundBinaryOperatorKind.Modulo;
+                default -> throw new RuntimeException("Unexpected binary operator " + syntaxKind);
+            };
 
-        return switch (syntaxKind) {
-            case PlusToken -> BoundBinaryOperatorKind.Addition;
-            case MinusToken -> BoundBinaryOperatorKind.Subtraction;
-            case MultiplyToken -> BoundBinaryOperatorKind.Multiplication;
-            case DivideToken -> BoundBinaryOperatorKind.Division;
-            case ModuloToken -> BoundBinaryOperatorKind.Modulo;
-            default -> throw new RuntimeException("Unexpected binary operator " + syntaxKind);
-        };
+        if (leftType == Boolean.class && rightType == Boolean.class)
+            return switch (syntaxKind) {
+                case DoubleAmpersandToken -> BoundBinaryOperatorKind.LogicalAnd;
+                case DoublePipeToken -> BoundBinaryOperatorKind.LogicalOr;
+                default -> throw new RuntimeException("Unexpected binary operator " + syntaxKind);
+            };
+
+        return null;
     }
 
 }

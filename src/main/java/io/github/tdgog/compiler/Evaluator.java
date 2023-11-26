@@ -34,17 +34,19 @@ public final class Evaluator {
                     return -o;
                 if (operand instanceof Integer o)
                     return -o;
+            } else if (syntaxKind == BoundUnaryOperatorKind.LogicalNegation) {
+                return !(boolean) operand;
             }
 
             throw new RuntimeException("Unexpected unary operator " + syntaxKind);
         }
         else if (root instanceof BoundBinaryExpression expression) {
-            Number leftExpression = (Number) evaluateExpression(expression.getLeft());
-            Number rightExpression = (Number) evaluateExpression(expression.getRight());
+            Object leftExpression = evaluateExpression(expression.getLeft());
+            Object rightExpression = evaluateExpression(expression.getRight());
 
             if (leftExpression instanceof Double || rightExpression instanceof Double) {
-                double left = leftExpression.doubleValue();
-                double right = rightExpression.doubleValue();
+                double left = (double) leftExpression;
+                double right = (double) rightExpression;
 
                 return switch (expression.getOperatorKind()) {
                     case Addition -> left + right;
@@ -56,8 +58,8 @@ public final class Evaluator {
             }
 
             if (leftExpression instanceof Integer || rightExpression instanceof Integer) {
-                int left = leftExpression.intValue();
-                int right = rightExpression.intValue();
+                int left = (int) leftExpression;
+                int right = (int) rightExpression;
 
                 return switch (expression.getOperatorKind()) {
                     case Addition -> left + right;
@@ -65,6 +67,15 @@ public final class Evaluator {
                     case Multiplication -> left * right;
                     case Division -> left / right;
                     case Modulo -> left % right;
+                    default -> throw new RuntimeException("Unexpected binary operator " + expression.getOperatorKind());
+                };
+            }
+
+            if (leftExpression instanceof Boolean left && rightExpression instanceof Boolean right) {
+                return switch (expression.getOperatorKind()) {
+                    case LogicalAnd -> left && right;
+                    case LogicalOr -> left || right;
+                    default -> throw new RuntimeException("Unexpected binary operator " + expression.getOperatorKind());
                 };
             }
 

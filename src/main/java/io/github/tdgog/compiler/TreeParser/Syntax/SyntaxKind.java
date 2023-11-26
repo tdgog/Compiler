@@ -16,6 +16,9 @@ public enum SyntaxKind {
     MultiplyToken,
     DivideToken,
     ModuloToken,
+    BangToken,
+    DoubleAmpersandToken,
+    DoublePipeToken,
     OpenBracketToken,
     CloseBracketToken,
     IdentifierToken,
@@ -37,8 +40,10 @@ public enum SyntaxKind {
      */
     public int getBinaryOperatorPrecedence() {
         return switch (this) {
-            case PlusToken, MinusToken -> 1;
-            case MultiplyToken, DivideToken, ModuloToken -> 2;
+            case DoublePipeToken -> 1;
+            case DoubleAmpersandToken -> 2;
+            case PlusToken, MinusToken -> 3;
+            case MultiplyToken, DivideToken, ModuloToken -> 4;
             default -> 0;
         };
     }
@@ -50,11 +55,16 @@ public enum SyntaxKind {
      */
     public int getUnaryOperatorPrecedence() {
         return switch (this) {
-            case PlusToken, MinusToken -> 3;
+            case PlusToken, MinusToken, BangToken -> Integer.MAX_VALUE;
             default -> 0;
         };
     }
 
+    /**
+     * Gets the SyntaxKind for a given keyword
+     * @param string The keyword
+     * @return The SyntaxKind
+     */
     public static SyntaxKind getKeywordKind(String string) {
         return switch (string) {
             case "true" -> SyntaxKind.TrueKeyword;

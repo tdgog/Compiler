@@ -32,6 +32,20 @@ public class Lexer {
         return getCharacterAtPosition(position);
     }
 
+    /**
+     * Get the character a number of indexes forward in the text
+     * @param offset The number of indexes forward
+     * @return The character the number of indexes forward or a null character if the end of the expression has been reached
+     */
+    private char peek(int offset) {
+        return getCharacterAtPosition(position + offset);
+    }
+
+    /**
+     * Get the character at a specific index in the text
+     * @param position The position of the character
+     * @return The character at the position or a null character if the end of the expression has been reached
+     */
     private char getCharacterAtPosition(int position) {
         if (text == null) {
             throw new RuntimeException("Attempt to parse a null expression.");
@@ -124,6 +138,16 @@ public class Lexer {
                 return new SyntaxToken(SyntaxKind.CloseBracketToken, position++, ")");
             case '%':
                 return new SyntaxToken(SyntaxKind.ModuloToken, position++, "%");
+            case '!':
+                return new SyntaxToken(SyntaxKind.BangToken, position++, "!");
+            case '&':
+                if (peek(1) == '&')
+                    return new SyntaxToken(SyntaxKind.DoubleAmpersandToken, position+=2, "&&");
+                break;
+            case '|':
+                if (peek(1) == '|')
+                    return new SyntaxToken(SyntaxKind.DoublePipeToken, position+=2, "||");
+                break;
         }
 
         // Return a bad token if the current character is not part of a valid token
