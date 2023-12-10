@@ -1,5 +1,7 @@
-package io.github.tdgog.compiler.Binder;
+package io.github.tdgog.compiler.Binder.Unary;
 
+import io.github.tdgog.compiler.Binder.BoundExpression;
+import io.github.tdgog.compiler.Binder.BoundNodeKind;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -7,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public final class BoundUnaryExpression extends BoundExpression {
 
-    private final BoundUnaryOperatorKind operatorKind;
+    private final BoundUnaryOperator operator;
     private final BoundExpression operand;
 
     @Override

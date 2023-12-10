@@ -1,4 +1,4 @@
-package io.github.tdgog.compiler.Binder;
+package io.github.tdgog.compiler.Binder.Unary;
 
 public enum BoundUnaryOperatorKind {
     Identity,

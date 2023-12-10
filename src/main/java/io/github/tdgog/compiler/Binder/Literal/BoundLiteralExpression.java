@@ -1,5 +1,7 @@
-package io.github.tdgog.compiler.Binder;
+package io.github.tdgog.compiler.Binder.Literal;
 
+import io.github.tdgog.compiler.Binder.BoundExpression;
+import io.github.tdgog.compiler.Binder.BoundNodeKind;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

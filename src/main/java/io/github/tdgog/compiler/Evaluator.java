@@ -1,6 +1,11 @@
 package io.github.tdgog.compiler;
 
 import io.github.tdgog.compiler.Binder.*;
+import io.github.tdgog.compiler.Binder.Binary.BoundBinaryExpression;
+import io.github.tdgog.compiler.Binder.Binary.BoundBinaryOperatorKind;
+import io.github.tdgog.compiler.Binder.Literal.BoundLiteralExpression;
+import io.github.tdgog.compiler.Binder.Unary.BoundUnaryExpression;
+import io.github.tdgog.compiler.Binder.Unary.BoundUnaryOperatorKind;
 import lombok.AllArgsConstructor;
 
 /**
@@ -25,7 +30,7 @@ public final class Evaluator {
             return expression.getValue();
         else if (root instanceof BoundUnaryExpression expression) {
             Object operand = evaluateExpression(expression.getOperand());
-            BoundUnaryOperatorKind syntaxKind = expression.getOperatorKind();
+            BoundUnaryOperatorKind syntaxKind = expression.getOperator().getOperatorKind();
 
             if (syntaxKind == BoundUnaryOperatorKind.Identity)
                 return operand;
@@ -43,17 +48,18 @@ public final class Evaluator {
         else if (root instanceof BoundBinaryExpression expression) {
             Object leftExpression = evaluateExpression(expression.getLeft());
             Object rightExpression = evaluateExpression(expression.getRight());
+            BoundBinaryOperatorKind operatorKind = expression.getOperator().getOperatorKind();
 
             if (leftExpression instanceof Double || rightExpression instanceof Double) {
                 double left = (double) leftExpression;
                 double right = (double) rightExpression;
 
-                return switch (expression.getOperatorKind()) {
+                return switch (operatorKind) {
                     case Addition -> left + right;
                     case Subtraction -> left - right;
                     case Multiplication -> left * right;
                     case Division -> left / right;
-                    default -> throw new RuntimeException("Unexpected binary operator " + expression.getOperatorKind());
+                    default -> throw new RuntimeException("Unexpected binary operator " + operatorKind);
                 };
             }
 
@@ -61,21 +67,21 @@ public final class Evaluator {
                 int left = (int) leftExpression;
                 int right = (int) rightExpression;
 
-                return switch (expression.getOperatorKind()) {
+                return switch (operatorKind) {
                     case Addition -> left + right;
                     case Subtraction -> left - right;
                     case Multiplication -> left * right;
                     case Division -> left / right;
                     case Modulo -> left % right;
-                    default -> throw new RuntimeException("Unexpected binary operator " + expression.getOperatorKind());
+                    default -> throw new RuntimeException("Unexpected binary operator " + operatorKind);
                 };
             }
 
             if (leftExpression instanceof Boolean left && rightExpression instanceof Boolean right) {
-                return switch (expression.getOperatorKind()) {
+                return switch (operatorKind) {
                     case LogicalAnd -> left && right;
                     case LogicalOr -> left || right;
-                    default -> throw new RuntimeException("Unexpected binary operator " + expression.getOperatorKind());
+                    default -> throw new RuntimeException("Unexpected binary operator " + operatorKind);
                 };
             }
 

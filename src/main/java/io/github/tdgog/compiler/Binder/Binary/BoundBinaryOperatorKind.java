@@ -1,4 +1,4 @@
-package io.github.tdgog.compiler.Binder;
+package io.github.tdgog.compiler.Binder.Binary;
 
 public enum BoundBinaryOperatorKind {
     Addition,

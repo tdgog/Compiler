@@ -1,11 +1,15 @@
 package io.github.tdgog.compiler.Binder;
 
+import io.github.tdgog.compiler.Binder.Binary.BoundBinaryExpression;
+import io.github.tdgog.compiler.Binder.Binary.BoundBinaryOperator;
+import io.github.tdgog.compiler.Binder.Literal.BoundLiteralExpression;
+import io.github.tdgog.compiler.Binder.Unary.BoundUnaryExpression;
+import io.github.tdgog.compiler.Binder.Unary.BoundUnaryOperator;
 import io.github.tdgog.compiler.Logging.ClassNameConverter;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.BinaryExpressionSyntax;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.ExpressionSyntax;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.LiteralExpressionSyntax;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.UnaryExpressionSyntax;
-import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -35,62 +39,27 @@ public final class Binder {
 
     private BoundExpression bindUnaryExpression(UnaryExpressionSyntax syntax) {
         BoundExpression operand = bindExpression(syntax.getOperand());
-        BoundUnaryOperatorKind operatorKind = bindUnaryOperatorKind(syntax.getOperatorToken().getSyntaxKind(), operand.getType());
+        BoundUnaryOperator operator = BoundUnaryOperator.bind(syntax.getOperatorToken().getSyntaxKind(), operand.getType());
 
-        if (operatorKind == null) {
+        if (operator == null) {
             diagnostics.add("Unary operator '" + syntax.getOperatorToken().getText() + "' is not defined for type " + ClassNameConverter.toFriendlyName((Class<?>) operand.getType()) + ".");
             return operand;
         }
 
-        return new BoundUnaryExpression(operatorKind, operand);
+        return new BoundUnaryExpression(operator, operand);
     }
 
     private BoundExpression bindBinaryExpression(BinaryExpressionSyntax syntax) {
         BoundExpression left = bindExpression(syntax.getLeft());
         BoundExpression right = bindExpression(syntax.getRight());
-        BoundBinaryOperatorKind operatorKind = bindBinaryOperatorKind(syntax.getOperatorToken().getSyntaxKind(), left.getType(), right.getType());
+        BoundBinaryOperator operator = BoundBinaryOperator.bind(syntax.getOperatorToken().getSyntaxKind(), left.getType(), right.getType());
 
-        if (operatorKind == null) {
+        if (operator == null) {
             diagnostics.add("Binary operator '" + syntax.getOperatorToken().getText() + "' is not defined for types " + ClassNameConverter.toFriendlyName((Class<?>) left.getType()) + " and " + ClassNameConverter.toFriendlyName((Class<?>) right.getType()) + ".");
             return left;
         }
 
-        return new BoundBinaryExpression(left, operatorKind, right);
-    }
-
-    private BoundUnaryOperatorKind bindUnaryOperatorKind(SyntaxKind syntaxKind, Object operandType) {
-        if (operandType == Integer.class || operandType == Double.class)
-            return switch (syntaxKind) {
-                case PlusToken -> BoundUnaryOperatorKind.Identity;
-                case MinusToken -> BoundUnaryOperatorKind.Negation;
-                default -> throw new RuntimeException("Unexpected unary operator " + syntaxKind);
-            };
-
-        if (operandType == Boolean.class && syntaxKind == SyntaxKind.BangToken)
-            return BoundUnaryOperatorKind.LogicalNegation;
-
-        return null;
-    }
-
-    private BoundBinaryOperatorKind bindBinaryOperatorKind(SyntaxKind syntaxKind, Object leftType, Object rightType) {
-        if (leftType == Integer.class && rightType == Integer.class)
-            return switch (syntaxKind) {
-                case PlusToken -> BoundBinaryOperatorKind.Addition;
-                case MinusToken -> BoundBinaryOperatorKind.Subtraction;
-                case MultiplyToken -> BoundBinaryOperatorKind.Multiplication;
-                case DivideToken -> BoundBinaryOperatorKind.Division;
-                case ModuloToken -> BoundBinaryOperatorKind.Modulo;
-                default -> throw new RuntimeException("Unexpected binary operator " + syntaxKind);
-            };
-
-        if (leftType == Boolean.class && rightType == Boolean.class)
-            return switch (syntaxKind) {
-                case DoubleAmpersandToken -> BoundBinaryOperatorKind.LogicalAnd;
-                case DoublePipeToken -> BoundBinaryOperatorKind.LogicalOr;
-                default -> throw new RuntimeException("Unexpected binary operator " + syntaxKind);
-            };
-
-        return null;
+        return new BoundBinaryExpression(left, operator, right);
     }
 
 }

@@ -1,5 +1,7 @@
-package io.github.tdgog.compiler.Binder;
+package io.github.tdgog.compiler.Binder.Binary;
 
+import io.github.tdgog.compiler.Binder.BoundExpression;
+import io.github.tdgog.compiler.Binder.BoundNodeKind;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -8,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 public final class BoundBinaryExpression extends BoundExpression {
 
     private final BoundExpression left;
-    private final BoundBinaryOperatorKind operatorKind;
+    private final BoundBinaryOperator operator;
     private final BoundExpression right;
 
     @Override
