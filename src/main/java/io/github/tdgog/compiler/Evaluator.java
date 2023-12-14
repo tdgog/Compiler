@@ -50,6 +50,12 @@ public final class Evaluator {
             Object rightExpression = evaluateExpression(expression.getRight());
             BoundBinaryOperatorKind operatorKind = expression.getOperator().getOperatorKind();
 
+            if (operatorKind == BoundBinaryOperatorKind.Equals) {
+                return leftExpression.equals(rightExpression);
+            } else if (operatorKind == BoundBinaryOperatorKind.NotEquals) {
+                return !leftExpression.equals(rightExpression);
+            }
+
             if (leftExpression instanceof Double || rightExpression instanceof Double) {
                 double left = (double) leftExpression;
                 double right = (double) rightExpression;

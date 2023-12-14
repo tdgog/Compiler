@@ -138,8 +138,6 @@ public class Lexer {
                 return new SyntaxToken(SyntaxKind.CloseBracketToken, position++, ")");
             case '%':
                 return new SyntaxToken(SyntaxKind.ModuloToken, position++, "%");
-            case '!':
-                return new SyntaxToken(SyntaxKind.BangToken, position++, "!");
             case '&':
                 if (peek(1) == '&')
                     return new SyntaxToken(SyntaxKind.DoubleAmpersandToken, position+=2, "&&");
@@ -148,6 +146,14 @@ public class Lexer {
                 if (peek(1) == '|')
                     return new SyntaxToken(SyntaxKind.DoublePipeToken, position+=2, "||");
                 break;
+            case '=':
+                if (peek(1) == '=')
+                    return new SyntaxToken(SyntaxKind.DoubleEqualsToken, position+=2, "==");
+                break;
+            case '!':
+                if (peek(1) == '=')
+                    return new SyntaxToken(SyntaxKind.BangEqualsToken, position+=2, "==");
+                return new SyntaxToken(SyntaxKind.BangToken, position++, "!");
         }
 
         // Return a bad token if the current character is not part of a valid token

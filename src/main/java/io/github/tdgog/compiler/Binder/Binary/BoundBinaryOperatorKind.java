@@ -7,5 +7,7 @@ public enum BoundBinaryOperatorKind {
     Division,
     LogicalAnd,
     LogicalOr,
-    Modulo
+    Modulo,
+    Equals,
+    NotEquals,
 }

@@ -19,6 +19,8 @@ public enum SyntaxKind {
     BangToken,
     DoubleAmpersandToken,
     DoublePipeToken,
+    DoubleEqualsToken,
+    BangEqualsToken,
     OpenBracketToken,
     CloseBracketToken,
     IdentifierToken,
@@ -42,8 +44,9 @@ public enum SyntaxKind {
         return switch (this) {
             case DoublePipeToken -> 1;
             case DoubleAmpersandToken -> 2;
-            case PlusToken, MinusToken -> 3;
-            case MultiplyToken, DivideToken, ModuloToken -> 4;
+            case DoubleEqualsToken, BangEqualsToken -> 3;
+            case PlusToken, MinusToken -> 4;
+            case MultiplyToken, DivideToken, ModuloToken -> 5;
             default -> 0;
         };
     }
