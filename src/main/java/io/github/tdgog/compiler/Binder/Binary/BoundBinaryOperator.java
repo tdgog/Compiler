@@ -1,12 +1,14 @@
 package io.github.tdgog.compiler.Binder.Binary;
 
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static java.util.Arrays.copyOf;
 
 @Getter
 @RequiredArgsConstructor
@@ -26,39 +28,39 @@ public class BoundBinaryOperator {
         this(syntaxKind, operatorKind, operandType, operandType, resultType);
     }
 
+    /* Define a list of all valid operations */
     private static final ArrayList<BoundBinaryOperator> operators = new ArrayList<>();
-
     static {
-        @AllArgsConstructor
+        @RequiredArgsConstructor
         @Getter
         final class TypeBindings {
-            private final Object primaryType;
-            private final Object[] secondaryTypes;
+            private final Class<?> primaryType;
+            private final Class<?>[] secondaryTypes;
+            private final Class<?> resultType;
             private final HashMap<SyntaxKind, BoundBinaryOperatorKind> boundKindLookup;
+            @Setter private boolean allPrimary = false;
 
-            public TypeBindings(Object primary, Object secondary, Object result, HashMap<SyntaxKind, BoundBinaryOperatorKind> boundKindLookup) {
-                this(primary, new Object[]{secondary}, boundKindLookup);
+            public TypeBindings(Class<?> primary, Class<?> secondary, HashMap<SyntaxKind, BoundBinaryOperatorKind> boundKindLookup) {
+                this(primary, new Class<?>[]{secondary}, primary, boundKindLookup);
             }
 
-            public TypeBindings(Object primary, Object secondary, HashMap<SyntaxKind, BoundBinaryOperatorKind> boundKindLookup) {
-                this(primary, new Object[]{secondary}, primary, boundKindLookup);
+            public TypeBindings(Class<?> primary, HashMap<SyntaxKind, BoundBinaryOperatorKind> boundKindLookup) {
+                this(primary, new Class<?>[]{primary}, primary, boundKindLookup);
             }
 
-            public TypeBindings(Object primary, HashMap<SyntaxKind, BoundBinaryOperatorKind> boundKindLookup) {
-                this(primary, new Object[]{primary}, primary, boundKindLookup);
+            public static TypeBindings allUndefinedPermutations(Class<?>[] primary, Class<?> result, HashMap<SyntaxKind, BoundBinaryOperatorKind> boundKindLookup) {
+                TypeBindings typeBindings = new TypeBindings(null, primary, result, boundKindLookup);
+                typeBindings.setAllPrimary(true);
+                return typeBindings;
             }
         }
 
-        /* PRIMARY ---------------------> [SECONDARY]
-        *     |    defined operators for
-        *     |                |-------------> {SyntaxKind : BoundBinaryOperatorKind}
-        *     |                 in the format
-        *     |---------------------------------> RESULT_TYPE || PRIMARY
-        *      which have a result type equal to
-        * */
         final TypeBindings[] bindings = new TypeBindings[] {
                 new TypeBindings(Integer.class, new HashMap<>() {{
                     put(SyntaxKind.ModuloToken, BoundBinaryOperatorKind.Modulo);
+                    put(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition);
+                    put(SyntaxKind.MinusToken, BoundBinaryOperatorKind.Subtraction);
+                    put(SyntaxKind.MultiplyToken, BoundBinaryOperatorKind.Multiplication);
                     put(SyntaxKind.DivideToken, BoundBinaryOperatorKind.Division);
                 }}),
                 new TypeBindings(Double.class, Integer.class, new HashMap<>() {{
@@ -68,22 +70,7 @@ public class BoundBinaryOperator {
                     put(SyntaxKind.DivideToken, BoundBinaryOperatorKind.Division);
                 }}),
 
-                /* TODO: There's lots of repetition here, find a way to update this to be more concise
-                *   Perhaps consider an option for all types in a TypeBinding to be considered primary
-                *   and therefore allow all permutations of typing as long as the result type is fixed */
-                new TypeBindings(Boolean.class, new Object[]{Integer.class, Double.class}, new HashMap<>() {{
-                    put(SyntaxKind.DoublePipeToken, BoundBinaryOperatorKind.LogicalOr);
-                    put(SyntaxKind.DoubleAmpersandToken, BoundBinaryOperatorKind.LogicalAnd);
-                    put(SyntaxKind.DoubleEqualsToken, BoundBinaryOperatorKind.Equals);
-                    put(SyntaxKind.BangEqualsToken, BoundBinaryOperatorKind.NotEquals);
-                }}),
-                new TypeBindings(Integer.class, Double.class, Boolean.class, new HashMap<>() {{
-                    put(SyntaxKind.DoublePipeToken, BoundBinaryOperatorKind.LogicalOr);
-                    put(SyntaxKind.DoubleAmpersandToken, BoundBinaryOperatorKind.LogicalAnd);
-                    put(SyntaxKind.DoubleEqualsToken, BoundBinaryOperatorKind.Equals);
-                    put(SyntaxKind.BangEqualsToken, BoundBinaryOperatorKind.NotEquals);
-                }}),
-                new TypeBindings(Double.class, Boolean.class, Boolean.class, new HashMap<>() {{
+                TypeBindings.allUndefinedPermutations(new Class<?>[]{Boolean.class, Integer.class, Double.class}, Boolean.class, new HashMap<>() {{
                     put(SyntaxKind.DoublePipeToken, BoundBinaryOperatorKind.LogicalOr);
                     put(SyntaxKind.DoubleAmpersandToken, BoundBinaryOperatorKind.LogicalAnd);
                     put(SyntaxKind.DoubleEqualsToken, BoundBinaryOperatorKind.Equals);
@@ -91,10 +78,52 @@ public class BoundBinaryOperator {
                 }}),
         };
 
-        /* TODO: Walk through the bindings and add them to the operators list
-        *   Note that type bindings are NOT defined between secondaries - for example the
-        *   TypeBindings(Double.class, Integer.class, ...) will not define a binding for Integer + Integer, only
-        *   Double + Integer, Double + Double, and Integer + Double */
+        final class OperatorRegistrator {
+            private static final ArrayList<String> registeredOperators = new ArrayList<>();
+
+            /**
+             * Registers an operator
+             * @param syntaxKind The operator's SyntaxKind
+             * @param leftOperand The type of the left operand
+             * @param rightOperand The type of the right operand
+             * @param binding The TypeBindings information
+             */
+            public static void register(SyntaxKind syntaxKind, Class<?> leftOperand, Class<?> rightOperand, TypeBindings binding) {
+                BoundBinaryOperator operator = new BoundBinaryOperator(
+                        syntaxKind,
+                        binding.getBoundKindLookup().get(syntaxKind),
+                        leftOperand,
+                        rightOperand,
+                        binding.getResultType());
+                String operatorInformation = operator.getOperatorInformation();
+                if (!registeredOperators.contains(operatorInformation)) {
+                    operators.add(operator);
+                    registeredOperators.add(operatorInformation);
+                }
+            }
+        }
+
+        for (TypeBindings binding : bindings) {
+            if (binding.isAllPrimary()) {
+                // Bind all operands with all operands across all kinds of operator
+                for (Class<?> leftOperand : binding.getSecondaryTypes())
+                    for (Class<?> rightOperand : binding.getSecondaryTypes())
+                        for (SyntaxKind kind : binding.getBoundKindLookup().keySet())
+                            OperatorRegistrator.register(kind, leftOperand, rightOperand, binding);
+            } else {
+                // Add the primary type into the array of secondary types
+                Class<?>[] secondaryTypes = copyOf(binding.getSecondaryTypes(), binding.getSecondaryTypes().length + 1);
+                secondaryTypes[secondaryTypes.length - 1] = binding.getPrimaryType();
+
+                // Bind the primary operand with all secondary operands and itself across all kinds of operator
+                for (Class<?> otherOperand : secondaryTypes) {
+                    for (SyntaxKind kind : binding.getBoundKindLookup().keySet()) {
+                        OperatorRegistrator.register(kind, binding.getPrimaryType(), otherOperand, binding);
+                        OperatorRegistrator.register(kind, otherOperand, binding.getPrimaryType(), binding);
+                    }
+                }
+            }
+        }
     }
 
     public static BoundBinaryOperator bind(SyntaxKind syntaxKind, Object leftType, Object rightType) {
@@ -104,4 +133,7 @@ public class BoundBinaryOperator {
         return null;
     }
 
+    private String getOperatorInformation() {
+        return String.valueOf(syntaxKind) + operatorKind + leftType + rightType + resultType;
+    }
 }
