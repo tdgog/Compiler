@@ -20,14 +20,6 @@ public class BoundBinaryOperator {
     private final Object rightType;
     private final Object resultType;
 
-    public BoundBinaryOperator(SyntaxKind syntaxKind, BoundBinaryOperatorKind operatorKind, Object type) {
-        this(syntaxKind, operatorKind, type, type, type);
-    }
-
-    public BoundBinaryOperator(SyntaxKind syntaxKind, BoundBinaryOperatorKind operatorKind, Object operandType, Object resultType) {
-        this(syntaxKind, operatorKind, operandType, operandType, resultType);
-    }
-
     /* Define a list of all valid operations */
     private static final ArrayList<BoundBinaryOperator> operators = new ArrayList<>();
     static {
