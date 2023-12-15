@@ -6,10 +6,7 @@ import io.github.tdgog.compiler.Binder.Literal.BoundLiteralExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryOperator;
 import io.github.tdgog.compiler.Logging.ClassNameConverter;
-import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.BinaryExpressionSyntax;
-import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.ExpressionSyntax;
-import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.LiteralExpressionSyntax;
-import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.UnaryExpressionSyntax;
+import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.*;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -29,6 +26,7 @@ public final class Binder {
             case LiteralExpression -> bindLiteralExpression((LiteralExpressionSyntax) syntax);
             case BinaryExpression -> bindBinaryExpression((BinaryExpressionSyntax) syntax);
             case UnaryExpression -> bindUnaryExpression((UnaryExpressionSyntax) syntax);
+            case BracketExpression -> bindExpression(((BracketExpressionSyntax) syntax).getExpression());
             default -> throw new RuntimeException("Unexpected syntax " + syntax.getSyntaxKind());
         };
     }
