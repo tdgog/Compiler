@@ -3,6 +3,12 @@ package io.github.tdgog.compiler.Binder.Binary;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import static java.util.Arrays.copyOf;
 
 @Getter
 @RequiredArgsConstructor
@@ -22,46 +28,103 @@ public class BoundBinaryOperator {
         this(syntaxKind, operatorKind, operandType, operandType, resultType);
     }
 
-    private static final BoundBinaryOperator[] operators = {
-            // Integer only
-            new BoundBinaryOperator(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition, Integer.class),
-            new BoundBinaryOperator(SyntaxKind.MinusToken, BoundBinaryOperatorKind.Subtraction, Integer.class),
-            new BoundBinaryOperator(SyntaxKind.MultiplyToken, BoundBinaryOperatorKind.Multiplication, Integer.class),
-            new BoundBinaryOperator(SyntaxKind.DivideToken, BoundBinaryOperatorKind.Division, Integer.class),
-            new BoundBinaryOperator(SyntaxKind.ModuloToken, BoundBinaryOperatorKind.Modulo, Integer.class),
-            new BoundBinaryOperator(SyntaxKind.DoubleEqualsToken, BoundBinaryOperatorKind.Equals, Integer.class, Boolean.class),
-            new BoundBinaryOperator(SyntaxKind.BangEqualsToken, BoundBinaryOperatorKind.NotEquals, Integer.class, Boolean.class),
+    /* Define a list of all valid operations */
+    private static final ArrayList<BoundBinaryOperator> operators = new ArrayList<>();
+    static {
+        @RequiredArgsConstructor
+        @Getter
+        final class TypeBindings {
+            private final Class<?> primaryType;
+            private final Class<?>[] secondaryTypes;
+            private final Class<?> resultType;
+            private final HashMap<SyntaxKind, BoundBinaryOperatorKind> boundKindLookup;
+            @Setter private boolean allPrimary = false;
 
-            // Double only
-            new BoundBinaryOperator(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition, Double.class),
-            new BoundBinaryOperator(SyntaxKind.MinusToken, BoundBinaryOperatorKind.Subtraction, Double.class),
-            new BoundBinaryOperator(SyntaxKind.MultiplyToken, BoundBinaryOperatorKind.Multiplication, Double.class),
-            new BoundBinaryOperator(SyntaxKind.DivideToken, BoundBinaryOperatorKind.Division, Double.class),
-            new BoundBinaryOperator(SyntaxKind.DoubleEqualsToken, BoundBinaryOperatorKind.Equals, Double.class, Boolean.class),
-            new BoundBinaryOperator(SyntaxKind.BangEqualsToken, BoundBinaryOperatorKind.NotEquals, Double.class, Boolean.class),
+            public TypeBindings(Class<?> primary, Class<?> secondary, HashMap<SyntaxKind, BoundBinaryOperatorKind> boundKindLookup) {
+                this(primary, new Class<?>[]{secondary}, primary, boundKindLookup);
+            }
 
-            // Integer +-/* Double
-            new BoundBinaryOperator(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition, Integer.class, Double.class, Double.class),
-            new BoundBinaryOperator(SyntaxKind.MinusToken, BoundBinaryOperatorKind.Subtraction, Integer.class, Double.class, Double.class),
-            new BoundBinaryOperator(SyntaxKind.MultiplyToken, BoundBinaryOperatorKind.Multiplication, Integer.class, Double.class, Double.class),
-            new BoundBinaryOperator(SyntaxKind.DivideToken, BoundBinaryOperatorKind.Division, Integer.class, Double.class, Double.class),
-            new BoundBinaryOperator(SyntaxKind.DoubleEqualsToken, BoundBinaryOperatorKind.Equals, Integer.class, Double.class, Boolean.class),
-            new BoundBinaryOperator(SyntaxKind.BangEqualsToken, BoundBinaryOperatorKind.NotEquals, Integer.class, Double.class, Boolean.class),
+            public TypeBindings(Class<?> primary, HashMap<SyntaxKind, BoundBinaryOperatorKind> boundKindLookup) {
+                this(primary, new Class<?>[]{primary}, primary, boundKindLookup);
+            }
 
-            // Double +-/* Integer
-            new BoundBinaryOperator(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition, Double.class, Integer.class, Double.class),
-            new BoundBinaryOperator(SyntaxKind.MinusToken, BoundBinaryOperatorKind.Subtraction, Double.class, Integer.class, Double.class),
-            new BoundBinaryOperator(SyntaxKind.MultiplyToken, BoundBinaryOperatorKind.Multiplication, Double.class, Integer.class, Double.class),
-            new BoundBinaryOperator(SyntaxKind.DivideToken, BoundBinaryOperatorKind.Division, Double.class, Integer.class, Double.class),
-            new BoundBinaryOperator(SyntaxKind.DoubleEqualsToken, BoundBinaryOperatorKind.Equals, Double.class, Integer.class, Boolean.class),
-            new BoundBinaryOperator(SyntaxKind.BangEqualsToken, BoundBinaryOperatorKind.NotEquals, Double.class, Integer.class, Boolean.class),
+            public static TypeBindings allUndefinedPermutations(Class<?>[] primary, Class<?> result, HashMap<SyntaxKind, BoundBinaryOperatorKind> boundKindLookup) {
+                TypeBindings typeBindings = new TypeBindings(null, primary, result, boundKindLookup);
+                typeBindings.setAllPrimary(true);
+                return typeBindings;
+            }
+        }
 
-            // Boolean
-            new BoundBinaryOperator(SyntaxKind.DoublePipeToken, BoundBinaryOperatorKind.LogicalOr, Boolean.class),
-            new BoundBinaryOperator(SyntaxKind.DoubleAmpersandToken, BoundBinaryOperatorKind.LogicalAnd, Boolean.class),
-            new BoundBinaryOperator(SyntaxKind.DoubleEqualsToken, BoundBinaryOperatorKind.Equals, Boolean.class),
-            new BoundBinaryOperator(SyntaxKind.BangEqualsToken, BoundBinaryOperatorKind.NotEquals, Boolean.class),
-    };
+        final TypeBindings[] bindings = new TypeBindings[] {
+                new TypeBindings(Integer.class, new HashMap<>() {{
+                    put(SyntaxKind.ModuloToken, BoundBinaryOperatorKind.Modulo);
+                    put(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition);
+                    put(SyntaxKind.MinusToken, BoundBinaryOperatorKind.Subtraction);
+                    put(SyntaxKind.MultiplyToken, BoundBinaryOperatorKind.Multiplication);
+                    put(SyntaxKind.DivideToken, BoundBinaryOperatorKind.Division);
+                }}),
+                new TypeBindings(Double.class, Integer.class, new HashMap<>() {{
+                    put(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition);
+                    put(SyntaxKind.MinusToken, BoundBinaryOperatorKind.Subtraction);
+                    put(SyntaxKind.MultiplyToken, BoundBinaryOperatorKind.Multiplication);
+                    put(SyntaxKind.DivideToken, BoundBinaryOperatorKind.Division);
+                }}),
+
+                TypeBindings.allUndefinedPermutations(new Class<?>[]{Boolean.class, Integer.class, Double.class}, Boolean.class, new HashMap<>() {{
+                    put(SyntaxKind.DoublePipeToken, BoundBinaryOperatorKind.LogicalOr);
+                    put(SyntaxKind.DoubleAmpersandToken, BoundBinaryOperatorKind.LogicalAnd);
+                    put(SyntaxKind.DoubleEqualsToken, BoundBinaryOperatorKind.Equals);
+                    put(SyntaxKind.BangEqualsToken, BoundBinaryOperatorKind.NotEquals);
+                }}),
+        };
+
+        final class OperatorRegistrator {
+            private static final ArrayList<String> registeredOperators = new ArrayList<>();
+
+            /**
+             * Registers an operator
+             * @param syntaxKind The operator's SyntaxKind
+             * @param leftOperand The type of the left operand
+             * @param rightOperand The type of the right operand
+             * @param binding The TypeBindings information
+             */
+            public static void register(SyntaxKind syntaxKind, Class<?> leftOperand, Class<?> rightOperand, TypeBindings binding) {
+                BoundBinaryOperator operator = new BoundBinaryOperator(
+                        syntaxKind,
+                        binding.getBoundKindLookup().get(syntaxKind),
+                        leftOperand,
+                        rightOperand,
+                        binding.getResultType());
+                String operatorInformation = operator.getOperatorInformation();
+                if (!registeredOperators.contains(operatorInformation)) {
+                    operators.add(operator);
+                    registeredOperators.add(operatorInformation);
+                }
+            }
+        }
+
+        for (TypeBindings binding : bindings) {
+            if (binding.isAllPrimary()) {
+                // Bind all operands with all operands across all kinds of operator
+                for (Class<?> leftOperand : binding.getSecondaryTypes())
+                    for (Class<?> rightOperand : binding.getSecondaryTypes())
+                        for (SyntaxKind kind : binding.getBoundKindLookup().keySet())
+                            OperatorRegistrator.register(kind, leftOperand, rightOperand, binding);
+            } else {
+                // Add the primary type into the array of secondary types
+                Class<?>[] secondaryTypes = copyOf(binding.getSecondaryTypes(), binding.getSecondaryTypes().length + 1);
+                secondaryTypes[secondaryTypes.length - 1] = binding.getPrimaryType();
+
+                // Bind the primary operand with all secondary operands and itself across all kinds of operator
+                for (Class<?> otherOperand : secondaryTypes) {
+                    for (SyntaxKind kind : binding.getBoundKindLookup().keySet()) {
+                        OperatorRegistrator.register(kind, binding.getPrimaryType(), otherOperand, binding);
+                        OperatorRegistrator.register(kind, otherOperand, binding.getPrimaryType(), binding);
+                    }
+                }
+            }
+        }
+    }
 
     public static BoundBinaryOperator bind(SyntaxKind syntaxKind, Object leftType, Object rightType) {
         for (BoundBinaryOperator operator : operators)
@@ -70,4 +133,7 @@ public class BoundBinaryOperator {
         return null;
     }
 
+    private String getOperatorInformation() {
+        return String.valueOf(syntaxKind) + operatorKind + leftType + rightType + resultType;
+    }
 }
