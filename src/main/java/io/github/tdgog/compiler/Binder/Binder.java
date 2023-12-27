@@ -5,12 +5,10 @@ import io.github.tdgog.compiler.Binder.Binary.BoundBinaryOperator;
 import io.github.tdgog.compiler.Binder.Literal.BoundLiteralExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryOperator;
-import io.github.tdgog.compiler.Logging.ClassNameConverter;
+import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.*;
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -19,7 +17,7 @@ import java.util.Objects;
 @Getter
 public final class Binder {
 
-    private final List<String> diagnostics = new ArrayList<>();
+    private final DiagnosticCollection diagnostics = new DiagnosticCollection();
 
     public BoundExpression bindExpression(ExpressionSyntax syntax) {
         return switch (syntax.getSyntaxKind()) {
@@ -40,7 +38,7 @@ public final class Binder {
         BoundUnaryOperator operator = BoundUnaryOperator.bind(syntax.getOperatorToken().getSyntaxKind(), operand.getType());
 
         if (operator == null) {
-            diagnostics.add("Unary operator '" + syntax.getOperatorToken().getText() + "' is not defined for type " + ClassNameConverter.toFriendlyName((Class<?>) operand.getType()) + ".");
+            diagnostics.reportUndefinedUnaryOperator(syntax.getOperatorToken(), operand.getType());
             return operand;
         }
 
@@ -53,7 +51,7 @@ public final class Binder {
         BoundBinaryOperator operator = BoundBinaryOperator.bind(syntax.getOperatorToken().getSyntaxKind(), left.getType(), right.getType());
 
         if (operator == null) {
-            diagnostics.add("Binary operator '" + syntax.getOperatorToken().getText() + "' is not defined for types " + ClassNameConverter.toFriendlyName((Class<?>) left.getType()) + " and " + ClassNameConverter.toFriendlyName((Class<?>) right.getType()) + ".");
+            diagnostics.reportUndefinedBinaryOperator(syntax.getOperatorToken(), left.getType(), right.getType());
             return left;
         }
 

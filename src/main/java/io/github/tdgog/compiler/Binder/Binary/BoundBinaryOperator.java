@@ -16,9 +16,9 @@ public class BoundBinaryOperator {
 
     private final SyntaxKind syntaxKind;
     private final BoundBinaryOperatorKind operatorKind;
-    private final Object leftType;
-    private final Object rightType;
-    private final Object resultType;
+    private final Class<?> leftType;
+    private final Class<?> rightType;
+    private final Class<?> resultType;
 
     /* Define a list of all valid operations */
     private static final ArrayList<BoundBinaryOperator> operators = new ArrayList<>();
@@ -118,7 +118,7 @@ public class BoundBinaryOperator {
         }
     }
 
-    public static BoundBinaryOperator bind(SyntaxKind syntaxKind, Object leftType, Object rightType) {
+    public static BoundBinaryOperator bind(SyntaxKind syntaxKind, Class<?> leftType, Class<?> rightType) {
         for (BoundBinaryOperator operator : operators)
             if (operator.syntaxKind == syntaxKind && operator.leftType == leftType && operator.rightType == rightType)
                 return operator;

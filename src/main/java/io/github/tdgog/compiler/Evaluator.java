@@ -65,6 +65,8 @@ public final class Evaluator {
                     case Subtraction -> left - right;
                     case Multiplication -> left * right;
                     case Division -> left / right;
+                    case LogicalAnd -> toBoolean(left) && toBoolean(right);
+                    case LogicalOr -> toBoolean(left) || toBoolean(right);
                     default -> throw new RuntimeException("Unexpected binary operator " + operatorKind);
                 };
             }
@@ -79,6 +81,8 @@ public final class Evaluator {
                     case Multiplication -> left * right;
                     case Division -> left / right;
                     case Modulo -> left % right;
+                    case LogicalAnd -> toBoolean(left) && toBoolean(right);
+                    case LogicalOr -> toBoolean(left) || toBoolean(right);
                     default -> throw new RuntimeException("Unexpected binary operator " + operatorKind);
                 };
             }
@@ -94,6 +98,14 @@ public final class Evaluator {
         }
 
         throw new RuntimeException("Unexpected node " + root.getBoundNodeKind());
+    }
+
+    private boolean toBoolean(int i) {
+        return i != 0;
+    }
+
+    private boolean toBoolean(double d) {
+        return d != 0;
     }
 
 }

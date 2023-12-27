@@ -13,7 +13,7 @@ public final class BoundUnaryExpression extends BoundExpression {
     private final BoundExpression operand;
 
     @Override
-    public Object getType() {
+    public Class<?> getType() {
         return operand.getType();
     }
 

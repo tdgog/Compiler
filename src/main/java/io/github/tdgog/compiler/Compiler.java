@@ -2,14 +2,15 @@ package io.github.tdgog.compiler;
 
 import io.github.tdgog.compiler.Binder.Binder;
 import io.github.tdgog.compiler.Binder.BoundExpression;
+import io.github.tdgog.compiler.CodeAnalysis.Diagnostic;
+import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
+import io.github.tdgog.compiler.CodeAnalysis.TextSpan;
 import io.github.tdgog.compiler.Logging.Colors;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxNode;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxTree;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -44,9 +45,10 @@ public class Compiler {
             BoundExpression boundExpression = binder.bindExpression(syntaxTree.getRoot());
 
             // Get the diagnostics from the parser & binder
-            List<String> diagnostics = new ArrayList<>();
-            diagnostics.addAll(syntaxTree.getDiagnostics());
-            diagnostics.addAll(binder.getDiagnostics());
+            // Freeze the diagnostic collection to prevent any more diagnostics being added
+            DiagnosticCollection diagnostics = DiagnosticCollection.createFrozen(
+                    syntaxTree.getDiagnostics(),
+                    binder.getDiagnostics());
 
             // Display the syntax tree
             if (showTree)
@@ -55,10 +57,16 @@ public class Compiler {
             // If any errors were found, display them
             // Otherwise, execute the line
             if (!diagnostics.isEmpty()) {
-                System.out.println(Colors.Foreground.ANSI_RED);
-                for (String diagnostic : diagnostics)
-                    System.out.println(diagnostic);
-                System.out.println(Colors.ANSI_RESET);
+                for (Diagnostic diagnostic : diagnostics) {
+                    TextSpan span = diagnostic.textSpan();
+                    System.out.println(Colors.Foreground.RED + diagnostic + Colors.RESET);
+                    System.out.println("\t" + line);
+                    System.out.println("\t"
+                            + Colors.Foreground.RED
+                            + " ".repeat(span.start())
+                            + "^".repeat(span.length())
+                            + Colors.RESET);
+                }
             } else {
                 // Evaluate the syntax tree
                 Evaluator evaluator = new Evaluator(boundExpression);
@@ -94,7 +102,7 @@ public class Compiler {
         // Find the last child of this parent node to determine which line type to use
         SyntaxNode lastChild = null;
         if (!node.getChildren().isEmpty())
-            lastChild = node.getChildren().get(node.getChildren().size() - 1);
+            lastChild = node.getChildren().getLast();
 
         // Recursively print the children of this node
         indent += isFirst ? "" : isLast ? "    " : "│   ";

@@ -1,17 +1,17 @@
 package io.github.tdgog.compiler.TreeParser;
 
+import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
+import io.github.tdgog.compiler.CodeAnalysis.TextSpan;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
 import lombok.Getter;
-
-import java.util.ArrayList;
 
 public class Lexer {
 
     private final String text;
     private int position;
     @Getter
-    private final ArrayList<String> diagnostics = new ArrayList<>();
+    private final DiagnosticCollection diagnostics = new DiagnosticCollection();
     
     public Lexer(String text) {
         this.text = text;
@@ -94,7 +94,7 @@ public class Lexer {
             else if (TokenDatatypeChecker.isFloat(value))
                 return new SyntaxToken(SyntaxKind.FloatToken, start, value, Double.parseDouble(value));
             else
-                diagnostics.add("ERROR: '" + value + "' is not a valid number");
+                diagnostics.reportInvalidNumber(new TextSpan(start, length), value, Double.class);
         }
 
         // If the current character is whitespace, return a whitespace token
@@ -152,12 +152,12 @@ public class Lexer {
                 break;
             case '!':
                 if (peek(1) == '=')
-                    return new SyntaxToken(SyntaxKind.BangEqualsToken, position+=2, "==");
+                    return new SyntaxToken(SyntaxKind.BangEqualsToken, position+=2, "!=");
                 return new SyntaxToken(SyntaxKind.BangToken, position++, "!");
         }
 
         // Return a bad token if the current character is not part of a valid token
-        diagnostics.add("ERROR: Bad character input: '" + getCurrentCharacter() + "'");
+        diagnostics.reportBadCharacter(position, getCurrentCharacter());
         return new SyntaxToken(SyntaxKind.BadToken, position++, text.substring(position - 1, position));
     }
 

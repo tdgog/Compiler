@@ -1,5 +1,6 @@
 package io.github.tdgog.compiler.TreeParser.Syntax;
 
+import io.github.tdgog.compiler.CodeAnalysis.TextSpan;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -25,6 +26,10 @@ public class SyntaxToken extends SyntaxNode {
      */
     public SyntaxToken(SyntaxKind syntaxKind, int position, String text) {
         this(syntaxKind, position, text, null);
+    }
+
+    public TextSpan getTextSpan() {
+        return new TextSpan(position, text.length());
     }
 
     @Override

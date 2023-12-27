@@ -1,5 +1,6 @@
 package io.github.tdgog.compiler.TreeParser;
 
+import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.*;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
@@ -8,14 +9,13 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.StringJoiner;
 
 public class Parser {
 
     private final SyntaxToken[] tokens;
     private int position;
     @Getter
-    private final ArrayList<String> diagnostics = new ArrayList<>();
+    private final DiagnosticCollection diagnostics = new DiagnosticCollection();
 
     public Parser(String text) {
         this.tokens = lex(text);
@@ -85,23 +85,16 @@ public class Parser {
         if (getCurrent().getSyntaxKind() == kind)
             return nextToken();
 
-        diagnostics.add("ERROR: Unexpected token <" + getCurrent().getSyntaxKind() + ">, expected <" + kind + ">.");
+        diagnostics.reportUnexpectedToken(getCurrent(), kind);
         return new SyntaxToken(kind, getCurrent().getPosition(), null);
     }
 
     private SyntaxToken match(SyntaxKind[] kinds) {
-        for (SyntaxKind kind : kinds) {
-            if (getCurrent().getSyntaxKind() == kind) {
+        for (SyntaxKind kind : kinds)
+            if (getCurrent().getSyntaxKind() == kind)
                 return nextToken();
-            }
-        }
 
-        StringJoiner expectedKinds = new StringJoiner("|");
-        for (SyntaxKind kind : kinds) {
-            expectedKinds.add("<" + kind + ">");
-        }
-
-        diagnostics.add("ERROR: Unexpected token <" + getCurrent().getSyntaxKind() + ">, expected " + expectedKinds + ".");
+        diagnostics.reportUnexpectedToken(getCurrent(), kinds);
         return new SyntaxToken(kinds[0], getCurrent().getPosition(), null);
     }
 
