@@ -56,12 +56,12 @@ public class BoundBinaryOperator {
                     put(SyntaxKind.DivideToken, BoundBinaryOperatorKind.Division);
                 }}),
                 new TypeBindings(Double.class, Integer.class, new HashMap<>() {{
+                    put(SyntaxKind.ModuloToken, BoundBinaryOperatorKind.Modulo);
                     put(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition);
                     put(SyntaxKind.MinusToken, BoundBinaryOperatorKind.Subtraction);
                     put(SyntaxKind.MultiplyToken, BoundBinaryOperatorKind.Multiplication);
                     put(SyntaxKind.DivideToken, BoundBinaryOperatorKind.Division);
                 }}),
-
                 TypeBindings.allUndefinedPermutations(new Class<?>[]{Boolean.class, Integer.class, Double.class}, Boolean.class, new HashMap<>() {{
                     put(SyntaxKind.DoublePipeToken, BoundBinaryOperatorKind.LogicalOr);
                     put(SyntaxKind.DoubleAmpersandToken, BoundBinaryOperatorKind.LogicalAnd);

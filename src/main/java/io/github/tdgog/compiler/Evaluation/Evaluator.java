@@ -1,4 +1,4 @@
-package io.github.tdgog.compiler;
+package io.github.tdgog.compiler.Evaluation;
 
 import io.github.tdgog.compiler.Binder.*;
 import io.github.tdgog.compiler.Binder.Binary.BoundBinaryExpression;
@@ -6,7 +6,13 @@ import io.github.tdgog.compiler.Binder.Binary.BoundBinaryOperatorKind;
 import io.github.tdgog.compiler.Binder.Literal.BoundLiteralExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryOperatorKind;
+import io.github.tdgog.compiler.Evaluation.Visitors.Visitor;
+import io.github.tdgog.compiler.Exceptions.UnexpectedBinaryOperatorException;
 import lombok.AllArgsConstructor;
+import org.reflections.Reflections;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
 /**
  * Evaluates numeric expressions
@@ -56,56 +62,22 @@ public final class Evaluator {
                 return !leftExpression.equals(rightExpression);
             }
 
-            if (leftExpression instanceof Double || rightExpression instanceof Double) {
-                double left = (double) leftExpression;
-                double right = (double) rightExpression;
+            try {
+                Set<Class<? extends Visitor>> visitors = new Reflections("io.github.tdgog.compiler.Evaluation.Visitors").getSubTypesOf(Visitor.class);
+                for (Class<? extends Visitor> clazz : visitors) {
+                    Visitor visitor = clazz.getDeclaredConstructor().newInstance();
+                    if (!visitor.acceptsOperator(operatorKind))
+                        continue;
 
-                return switch (operatorKind) {
-                    case Addition -> left + right;
-                    case Subtraction -> left - right;
-                    case Multiplication -> left * right;
-                    case Division -> left / right;
-                    case LogicalAnd -> toBoolean(left) && toBoolean(right);
-                    case LogicalOr -> toBoolean(left) || toBoolean(right);
-                    default -> throw new RuntimeException("Unexpected binary operator " + operatorKind);
-                };
+                    return visitor.visit(leftExpression, rightExpression);
+                }
+            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+                     InvocationTargetException | UnexpectedBinaryOperatorException e) {
+                throw new RuntimeException(e);
             }
-
-            if (leftExpression instanceof Integer || rightExpression instanceof Integer) {
-                int left = (int) leftExpression;
-                int right = (int) rightExpression;
-
-                return switch (operatorKind) {
-                    case Addition -> left + right;
-                    case Subtraction -> left - right;
-                    case Multiplication -> left * right;
-                    case Division -> left / right;
-                    case Modulo -> left % right;
-                    case LogicalAnd -> toBoolean(left) && toBoolean(right);
-                    case LogicalOr -> toBoolean(left) || toBoolean(right);
-                    default -> throw new RuntimeException("Unexpected binary operator " + operatorKind);
-                };
-            }
-
-            if (leftExpression instanceof Boolean left && rightExpression instanceof Boolean right) {
-                return switch (operatorKind) {
-                    case LogicalAnd -> left && right;
-                    case LogicalOr -> left || right;
-                    default -> throw new RuntimeException("Unexpected binary operator " + operatorKind);
-                };
-            }
-
         }
 
         throw new RuntimeException("Unexpected node " + root.getBoundNodeKind());
-    }
-
-    private boolean toBoolean(int i) {
-        return i != 0;
-    }
-
-    private boolean toBoolean(double d) {
-        return d != 0;
     }
 
 }

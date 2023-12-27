@@ -5,6 +5,7 @@ import io.github.tdgog.compiler.Binder.BoundExpression;
 import io.github.tdgog.compiler.CodeAnalysis.Diagnostic;
 import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
 import io.github.tdgog.compiler.CodeAnalysis.TextSpan;
+import io.github.tdgog.compiler.Evaluation.Evaluator;
 import io.github.tdgog.compiler.Logging.Colors;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxNode;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
@@ -108,6 +109,11 @@ public class Compiler {
         indent += isFirst ? "" : isLast ? "    " : "│   ";
         for (SyntaxNode child : node.getChildren())
             prettyPrint(child, indent, false, child == lastChild);
+    }
+
+    // Disable org.reflections logging
+    static {
+        System.setProperty("org.slf4j.simpleLogger.log.org.reflections", "off");
     }
 
 }
