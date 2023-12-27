@@ -139,20 +139,32 @@ public class Lexer {
             case '%':
                 return new SyntaxToken(SyntaxKind.ModuloToken, position++, "%");
             case '&':
-                if (peek(1) == '&')
-                    return new SyntaxToken(SyntaxKind.DoubleAmpersandToken, position+=2, "&&");
+                if (peek(1) == '&') {
+                    SyntaxToken token = new SyntaxToken(SyntaxKind.DoubleAmpersandToken, position, "&&");
+                    position += 2;
+                    return token;
+                }
                 break;
             case '|':
-                if (peek(1) == '|')
-                    return new SyntaxToken(SyntaxKind.DoublePipeToken, position+=2, "||");
+                if (peek(1) == '|') {
+                    SyntaxToken token = new SyntaxToken(SyntaxKind.DoublePipeToken, position, "||");
+                    position += 2;
+                    return token;
+                }
                 break;
             case '=':
-                if (peek(1) == '=')
-                    return new SyntaxToken(SyntaxKind.DoubleEqualsToken, position+=2, "==");
+                if (peek(1) == '=') {
+                    SyntaxToken token = new SyntaxToken(SyntaxKind.DoubleEqualsToken, position, "==");
+                    position += 2;
+                    return token;
+                }
                 break;
             case '!':
-                if (peek(1) == '=')
-                    return new SyntaxToken(SyntaxKind.BangEqualsToken, position+=2, "!=");
+                if (peek(1) == '=') {
+                    SyntaxToken token = new SyntaxToken(SyntaxKind.BangEqualsToken, position, "!=");
+                    position += 2;
+                    return token;
+                }
                 return new SyntaxToken(SyntaxKind.BangToken, position++, "!");
         }
 
