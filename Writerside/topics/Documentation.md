@@ -1,0 +1,3 @@
+# Documentation
+
+Xylo language documentation.

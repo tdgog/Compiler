@@ -6,6 +6,11 @@
                  name="Xylo Documentation"
                  start-page="Xylo.md">
     <toc-element topic="Xylo.md"/>
+    <toc-element topic="Documentation.md">
+        <toc-element topic="Basics.md">
+            <toc-element topic="Variables.md"/>
+        </toc-element>
+    </toc-element>
     <toc-element topic="Compiler-Internals.md">
         <toc-element topic="Lexing.md"/>
         <toc-element topic="Parser.md"/>
