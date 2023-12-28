@@ -1,4 +1,4 @@
-package io.github.tdgog.compiler.Logging;
+package io.github.tdgog.compiler.CodeAnalysis.Logging;
 
 public final class ClassNameConverter {
 

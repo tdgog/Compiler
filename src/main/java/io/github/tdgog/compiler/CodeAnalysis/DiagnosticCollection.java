@@ -1,7 +1,7 @@
 package io.github.tdgog.compiler.CodeAnalysis;
 
-import io.github.tdgog.compiler.Logging.ClassNameConverter;
-import io.github.tdgog.compiler.Logging.Colors;
+import io.github.tdgog.compiler.CodeAnalysis.Logging.ClassNameConverter;
+import io.github.tdgog.compiler.CodeAnalysis.Logging.Colors;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
 import org.jetbrains.annotations.NotNull;

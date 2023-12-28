@@ -1,4 +1,4 @@
-package io.github.tdgog.compiler.Logging;
+package io.github.tdgog.compiler.CodeAnalysis.Logging;
 
 /**
  * Stores all ANSI colors that can be printed to the terminal
