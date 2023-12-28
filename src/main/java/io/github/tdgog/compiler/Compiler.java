@@ -25,19 +25,30 @@ public class Compiler {
     public static void main(String[] args) {
         boolean showTree = false;
 
+        String lineBuffer = "";
         while (true) {
-            // Get the line from the shell
+            // Get the line from the shell - a line ends when a semicolon is found.
+            // Anything remaining after the semicolon is stored in a buffer to be used for the next line.
             System.out.print("> ");
-            String line = scanner.nextLine();
-            if (line == null || line.isBlank() || line.isEmpty())
-                return;
+            StringBuilder lineBuilder = new StringBuilder(lineBuffer);
+            while (!lineBuilder.toString().contains(";"))
+                lineBuilder.append(scanner.nextLine());
+            String line = lineBuilder.toString();
+            lineBuffer = line.substring(line.indexOf(';') + 1);
+            line = line.substring(0, line.indexOf(';'));
 
+            // Debug functionality
             if (line.equalsIgnoreCase("!showtree")) {
                 showTree = !showTree;
                 System.out.println("Show parse tree: " + showTree);
                 continue;
             } else if (line.equalsIgnoreCase("!clear")) {
                 System.out.println("\n".repeat(100));
+                continue;
+            } else if (line.equalsIgnoreCase("!quit")) {
+                break;
+            } else if (line.equalsIgnoreCase("!variables")) {
+                System.out.println(variables);
                 continue;
             }
 

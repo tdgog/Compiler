@@ -5,6 +5,6 @@ name.
 
 ```java
 int age = 20;
-float height = 1.75;
+double height = 1.75;
 boolean isAwake = true;
 ```
