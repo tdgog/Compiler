@@ -8,6 +8,8 @@ import io.github.tdgog.compiler.Binder.Named.BoundVariableExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryOperator;
 import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
+import io.github.tdgog.compiler.CodeAnalysis.VariableCollection;
+import io.github.tdgog.compiler.CodeAnalysis.VariableSymbol;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,7 @@ import java.util.Objects;
 public final class Binder {
 
     private final DiagnosticCollection diagnostics = new DiagnosticCollection();
-    private final HashMap<String, Object> variables;
+    private final VariableCollection variables;
 
     public BoundExpression bindExpression(ExpressionSyntax syntax) {
         return switch (syntax.getSyntaxKind()) {
@@ -73,18 +75,27 @@ public final class Binder {
 
     private BoundExpression bindNameExpression(NameExpressionSyntax syntax) {
         String name = syntax.getIdentifierToken().getText();
+        System.out.println(variables);
         if (!variables.containsKey(name)) {
             diagnostics.reportUndefinedName(syntax.getIdentifierToken().getTextSpan(), name);
             return new BoundLiteralExpression(0);
         }
 
         Object type = variables.get(name);
-        return new BoundVariableExpression(name, type.getClass());
+        return new BoundVariableExpression(new VariableSymbol(name, type.getClass()));
     }
 
     private BoundExpression bindAssignmentExpression(AssignmentExpressionSyntax syntax) {
         String name = syntax.getIdentifierToken().getText();
         BoundExpression boundExpression = bindExpression(syntax.getExpression());
+
+        if (variables.containsKey(name)) {
+            VariableSymbol variable = variables.getVariableSymbolFromName(name);
+            if (variable.type() != boundExpression.getType()) {
+                diagnostics.reportAttemptToModifyVariableType(syntax.getIdentifierToken(), variable.type(), boundExpression.getType());
+            }
+        }
+
         return new BoundAssignmentExpression(name, boundExpression);
     }
 

@@ -3,6 +3,8 @@ package io.github.tdgog.compiler;
 import io.github.tdgog.compiler.Binder.Binder;
 import io.github.tdgog.compiler.Binder.BoundExpression;
 import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
+import io.github.tdgog.compiler.CodeAnalysis.VariableCollection;
+import io.github.tdgog.compiler.CodeAnalysis.VariableSymbol;
 import io.github.tdgog.compiler.Evaluation.Evaluator;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxNode;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
@@ -18,7 +20,7 @@ import java.util.Scanner;
 public class Compiler {
 
     private static final Scanner scanner = new Scanner(System.in);
-    private static final HashMap<String, Object> variables = new HashMap<>();
+    private static final VariableCollection variables = new VariableCollection();
 
     public static void main(String[] args) {
         boolean showTree = false;

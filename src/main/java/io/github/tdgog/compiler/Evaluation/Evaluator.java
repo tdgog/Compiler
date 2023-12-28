@@ -8,6 +8,8 @@ import io.github.tdgog.compiler.Binder.Named.BoundAssignmentExpression;
 import io.github.tdgog.compiler.Binder.Named.BoundVariableExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryOperatorKind;
+import io.github.tdgog.compiler.CodeAnalysis.VariableCollection;
+import io.github.tdgog.compiler.CodeAnalysis.VariableSymbol;
 import io.github.tdgog.compiler.Evaluation.Visitors.Visitor;
 import io.github.tdgog.compiler.Exceptions.UnexpectedBinaryOperatorException;
 import lombok.AllArgsConstructor;
@@ -24,7 +26,7 @@ import java.util.Set;
 public final class Evaluator {
 
     private final BoundExpression root;
-    private final HashMap<String, Object> variables;
+    private final VariableCollection variables;
 
     public Object evaluate() {
         return evaluateExpression(root);
@@ -39,10 +41,10 @@ public final class Evaluator {
         if (root instanceof BoundLiteralExpression expression)
             return expression.getValue();
         else if (root instanceof BoundVariableExpression expression)
-            return variables.get(expression.getName());
+            return variables.get(expression.getVariable());
         else if (root instanceof BoundAssignmentExpression expression) {
             Object value = evaluateExpression(expression.getExpression());
-            variables.put(expression.getName(), value);
+            variables.put(new VariableSymbol(expression.getName(), expression.getType()), value);
             return value;
         }
         else if (root instanceof BoundUnaryExpression expression) {

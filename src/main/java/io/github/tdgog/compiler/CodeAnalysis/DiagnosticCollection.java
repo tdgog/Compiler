@@ -7,6 +7,7 @@ import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class DiagnosticCollection implements Iterable<Diagnostic> {
 
@@ -62,6 +63,12 @@ public class DiagnosticCollection implements Iterable<Diagnostic> {
     public void reportUndefinedName(TextSpan textSpan, String name) {
         String message = "Variable '" + name + "' doesn't exist.";
         report(textSpan, message);
+    }
+
+    public void reportAttemptToModifyVariableType(SyntaxToken token, Class<?> expected, Class<?> recieved) {
+        String message = "Attempt to assign " + ClassNameConverter.toFriendlyName(recieved) + " to "
+                + ClassNameConverter.toFriendlyName(expected) + " variable '" + token.getText() + "'.";
+        report(token.getTextSpan(), message);
     }
 
     public void addAll(DiagnosticCollection diagnostics) {
