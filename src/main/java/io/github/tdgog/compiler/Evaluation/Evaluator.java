@@ -4,6 +4,8 @@ import io.github.tdgog.compiler.Binder.*;
 import io.github.tdgog.compiler.Binder.Binary.BoundBinaryExpression;
 import io.github.tdgog.compiler.Binder.Binary.BoundBinaryOperatorKind;
 import io.github.tdgog.compiler.Binder.Literal.BoundLiteralExpression;
+import io.github.tdgog.compiler.Binder.Named.BoundAssignmentExpression;
+import io.github.tdgog.compiler.Binder.Named.BoundVariableExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryOperatorKind;
 import io.github.tdgog.compiler.Evaluation.Visitors.Visitor;
@@ -12,6 +14,7 @@ import lombok.AllArgsConstructor;
 import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -21,6 +24,7 @@ import java.util.Set;
 public final class Evaluator {
 
     private final BoundExpression root;
+    private final HashMap<String, Object> variables;
 
     public Object evaluate() {
         return evaluateExpression(root);
@@ -34,6 +38,13 @@ public final class Evaluator {
     private Object evaluateExpression(BoundExpression root) {
         if (root instanceof BoundLiteralExpression expression)
             return expression.getValue();
+        else if (root instanceof BoundVariableExpression expression)
+            return variables.get(expression.getName());
+        else if (root instanceof BoundAssignmentExpression expression) {
+            Object value = evaluateExpression(expression.getExpression());
+            variables.put(expression.getName(), value);
+            return value;
+        }
         else if (root instanceof BoundUnaryExpression expression) {
             Object operand = evaluateExpression(expression.getOperand());
             BoundUnaryOperatorKind syntaxKind = expression.getOperator().getOperatorKind();

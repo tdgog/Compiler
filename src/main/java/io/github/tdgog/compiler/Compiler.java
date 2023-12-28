@@ -12,6 +12,7 @@ import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxTree;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.Scanner;
 
 /**
@@ -20,6 +21,7 @@ import java.util.Scanner;
 public class Compiler {
 
     private static final Scanner scanner = new Scanner(System.in);
+    private static final HashMap<String, Object> variables = new HashMap<>();
 
     public static void main(String[] args) {
         boolean showTree = false;
@@ -42,35 +44,22 @@ public class Compiler {
 
             // Parse the line into a bound syntax tree
             SyntaxTree syntaxTree = SyntaxTree.parse(line);
-            Binder binder = new Binder();
+            Binder binder = new Binder(variables);
             BoundExpression boundExpression = binder.bindExpression(syntaxTree.getRoot());
-
-            // Get the diagnostics from the parser & binder
-            // Freeze the diagnostic collection to prevent any more diagnostics being added
-            DiagnosticCollection diagnostics = DiagnosticCollection.createFrozen(
-                    syntaxTree.getDiagnostics(),
-                    binder.getDiagnostics());
 
             // Display the syntax tree
             if (showTree)
-                prettyPrint(syntaxTree.getRoot());
+                printSyntaxTree(syntaxTree.getRoot());
 
-            // If any errors were found, display them
-            // Otherwise, execute the line
-            if (!diagnostics.isEmpty()) {
-                for (Diagnostic diagnostic : diagnostics) {
-                    TextSpan span = diagnostic.textSpan();
-                    System.out.println(Colors.Foreground.RED + diagnostic + Colors.RESET);
-                    System.out.println("\t" + line);
-                    System.out.println("\t"
-                            + Colors.Foreground.RED
-                            + " ".repeat(span.start())
-                            + "^".repeat(span.length())
-                            + Colors.RESET);
-                }
-            } else {
-                // Evaluate the syntax tree
-                Evaluator evaluator = new Evaluator(boundExpression);
+            // Print any errors
+            DiagnosticCollection diagnostics = DiagnosticCollection.createFrozen(
+                    syntaxTree.getDiagnostics(),
+                    binder.getDiagnostics());
+            diagnostics.print(line);
+
+            // Evaluate the syntax tree
+            if (diagnostics.isEmpty()) {
+                Evaluator evaluator = new Evaluator(boundExpression, variables);
                 Object result = evaluator.evaluate();
                 System.out.println(result);
             }
@@ -81,8 +70,8 @@ public class Compiler {
      * Prints the syntax tree
      * @param node The parent node to start from
      */
-    private static void prettyPrint(SyntaxNode node) {
-        prettyPrint(node, "", true, false);
+    private static void printSyntaxTree(SyntaxNode node) {
+        printSyntaxTree(node, "", true, false);
     }
 
     /**
@@ -92,7 +81,7 @@ public class Compiler {
      * @param isFirst Is this the first node in the entire tree?
      * @param isLast Is this the last child node of the parent?
      */
-    private static void prettyPrint(@NotNull SyntaxNode node, String indent, boolean isFirst, boolean isLast) {
+    private static void printSyntaxTree(@NotNull SyntaxNode node, String indent, boolean isFirst, boolean isLast) {
         // Print the node type and value
         String marker = isFirst ? "" : isLast ? "└───" : "├───";
         System.out.print(indent + marker + node.getSyntaxKind());
@@ -108,7 +97,7 @@ public class Compiler {
         // Recursively print the children of this node
         indent += isFirst ? "" : isLast ? "    " : "│   ";
         for (SyntaxNode child : node.getChildren())
-            prettyPrint(child, indent, false, child == lastChild);
+            printSyntaxTree(child, indent, false, child == lastChild);
     }
 
     // Disable org.reflections logging

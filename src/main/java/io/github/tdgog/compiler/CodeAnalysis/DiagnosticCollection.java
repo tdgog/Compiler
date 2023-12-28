@@ -1,6 +1,7 @@
 package io.github.tdgog.compiler.CodeAnalysis;
 
 import io.github.tdgog.compiler.Logging.ClassNameConverter;
+import io.github.tdgog.compiler.Logging.Colors;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
 import org.jetbrains.annotations.NotNull;
@@ -58,6 +59,11 @@ public class DiagnosticCollection implements Iterable<Diagnostic> {
         report(textSpan, message);
     }
 
+    public void reportUndefinedName(TextSpan textSpan, String name) {
+        String message = "Variable '" + name + "' doesn't exist.";
+        report(textSpan, message);
+    }
+
     public void addAll(DiagnosticCollection diagnostics) {
         if (frozen)
             return;
@@ -67,6 +73,19 @@ public class DiagnosticCollection implements Iterable<Diagnostic> {
 
     public boolean isEmpty() {
         return diagnostics.isEmpty();
+    }
+
+    public void print(String line) {
+        for (Diagnostic diagnostic : diagnostics) {
+            TextSpan span = diagnostic.textSpan();
+            System.out.println(Colors.Foreground.RED + diagnostic + Colors.RESET);
+            System.out.println("\t" + line);
+            System.out.println("\t"
+                    + Colors.Foreground.RED
+                    + " ".repeat(span.start())
+                    + "^".repeat(span.length())
+                    + Colors.RESET);
+        }
     }
 
     public static DiagnosticCollection createFrozen(DiagnosticCollection... diagnosticCollections) {
@@ -82,5 +101,4 @@ public class DiagnosticCollection implements Iterable<Diagnostic> {
     public Iterator<Diagnostic> iterator() {
         return diagnostics.iterator();
     }
-
 }

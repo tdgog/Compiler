@@ -108,17 +108,33 @@ public class Parser {
         return new SyntaxTree(expression, eofToken, diagnostics);
     }
 
+    private ExpressionSyntax parseExpression() {
+        return parseAssignmentExpression();
+    }
+
+    private ExpressionSyntax parseAssignmentExpression() {
+        if (getCurrent().getSyntaxKind() == SyntaxKind.IdentifierToken
+                && peek(1).getSyntaxKind() == SyntaxKind.EqualsToken) {
+            SyntaxToken identifier = nextToken();
+            SyntaxToken operator = nextToken();
+            ExpressionSyntax right = parseAssignmentExpression();
+            return new AssignmentExpressionSyntax(identifier, operator, right);
+        }
+
+        return parseBinaryExpression();
+    }
+
     /**
      * Parses an expression
      * @param parentPrecedence The operator's precedence {@link io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind#getBinaryOperatorPrecedence()}
      * @return The expression
      */
-    private ExpressionSyntax parseExpression(int parentPrecedence) {
+    private ExpressionSyntax parseBinaryExpression(int parentPrecedence) {
         // Parse unary expressions
         ExpressionSyntax left;
         int unaryOperatorPrecedence = getCurrent().getSyntaxKind().getUnaryOperatorPrecedence();
         if (unaryOperatorPrecedence != 0 && unaryOperatorPrecedence >= parentPrecedence)
-            left = new UnaryExpressionSyntax(nextToken(), parseExpression(unaryOperatorPrecedence));
+            left = new UnaryExpressionSyntax(nextToken(), parseBinaryExpression(unaryOperatorPrecedence));
         else
             left = parsePrimaryExpression();
 
@@ -129,15 +145,15 @@ public class Parser {
                 break;
 
             SyntaxToken operatorToken = nextToken();
-            ExpressionSyntax right = parseExpression(precedence);
+            ExpressionSyntax right = parseBinaryExpression(precedence);
             left = new BinaryExpressionSyntax(left, operatorToken, right);
         }
 
         return left;
     }
 
-    private ExpressionSyntax parseExpression() {
-        return parseExpression(0);
+    private ExpressionSyntax parseBinaryExpression() {
+        return parseBinaryExpression(0);
     }
 
     /**
@@ -148,13 +164,17 @@ public class Parser {
         switch (getCurrent().getSyntaxKind()) {
             case OpenBracketToken -> {
                 SyntaxToken openBracketToken = nextToken();
-                ExpressionSyntax expression = parseExpression();
+                ExpressionSyntax expression = parseBinaryExpression();
                 SyntaxToken closeBracketToken = match(SyntaxKind.CloseBracketToken);
                 return new BracketExpressionSyntax(openBracketToken, expression, closeBracketToken);
             }
             case TrueKeyword, FalseKeyword -> {
                 Boolean value = getCurrent().getSyntaxKind() == SyntaxKind.TrueKeyword;
                 return new LiteralExpressionSyntax(nextToken(), value);
+            }
+            case IdentifierToken -> {
+                SyntaxToken identifierToken = nextToken();
+                return new NameExpressionSyntax(identifierToken);
             }
             default -> {
                 SyntaxToken token = match(new SyntaxKind[]{SyntaxKind.IntegerToken, SyntaxKind.FloatToken});

@@ -158,7 +158,7 @@ public class Lexer {
                     position += 2;
                     return token;
                 }
-                break;
+                return new SyntaxToken(SyntaxKind.EqualsToken, position++, "=");
             case '!':
                 if (peek(1) == '=') {
                     SyntaxToken token = new SyntaxToken(SyntaxKind.BangEqualsToken, position, "!=");

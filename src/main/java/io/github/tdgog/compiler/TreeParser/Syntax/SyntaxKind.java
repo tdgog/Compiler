@@ -24,12 +24,15 @@ public enum SyntaxKind {
     OpenBracketToken,
     CloseBracketToken,
     IdentifierToken,
+    EqualsToken,
 
     // Expressions
     UnaryExpression,
     BinaryExpression,
     BracketExpression,
     LiteralExpression,
+    NameExpression,
+    AssignmentExpression,
 
     // Keywords
     TrueKeyword,
