@@ -7,7 +7,6 @@ import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Function;
 
 public class DiagnosticCollection implements Iterable<Diagnostic> {
 
@@ -65,9 +64,20 @@ public class DiagnosticCollection implements Iterable<Diagnostic> {
         report(textSpan, message);
     }
 
-    public void reportAttemptToModifyVariableType(SyntaxToken token, Class<?> expected, Class<?> recieved) {
+    public void reportIncorrectTypeAssignment(SyntaxToken token, Class<?> expected, Class<?> recieved) {
         String message = "Attempt to assign " + ClassNameConverter.toFriendlyName(recieved) + " to "
                 + ClassNameConverter.toFriendlyName(expected) + " variable '" + token.getText() + "'.";
+        report(token.getTextSpan(), message);
+    }
+
+    public void reportInvalidType(SyntaxToken type) {
+        String message = "Unknown type '" + type.getText() + "'";
+        report(type.getTextSpan(), message);
+    }
+
+    public void reportVariableRedeclaration(SyntaxToken token) {
+        String message = "Variable '" + token.getText() + "' has already been declared. Consider reassigning it or " +
+                "declaring a variable with a different name.";
         report(token.getTextSpan(), message);
     }
 

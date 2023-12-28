@@ -14,8 +14,6 @@ import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.sql.Struct;
-import java.util.HashMap;
 import java.util.Objects;
 
 /**
@@ -35,6 +33,7 @@ public final class Binder {
             case UnaryExpression -> bindUnaryExpression((UnaryExpressionSyntax) syntax);
             case BracketExpression -> bindBracketExpression((BracketExpressionSyntax) syntax);
             case NameExpression -> bindNameExpression((NameExpressionSyntax) syntax);
+            case DefinitionExpression -> bindDefinitionExpression((DefinitionExpressionSyntax) syntax);
             case AssignmentExpression -> bindAssignmentExpression((AssignmentExpressionSyntax) syntax);
             default -> throw new RuntimeException("Unexpected syntax " + syntax.getSyntaxKind());
         };
@@ -75,7 +74,6 @@ public final class Binder {
 
     private BoundExpression bindNameExpression(NameExpressionSyntax syntax) {
         String name = syntax.getIdentifierToken().getText();
-        System.out.println(variables);
         if (!variables.containsKey(name)) {
             diagnostics.reportUndefinedName(syntax.getIdentifierToken().getTextSpan(), name);
             return new BoundLiteralExpression(0);
@@ -85,18 +83,52 @@ public final class Binder {
         return new BoundVariableExpression(new VariableSymbol(name, type.getClass()));
     }
 
-    private BoundExpression bindAssignmentExpression(AssignmentExpressionSyntax syntax) {
+    private BoundExpression bindDefinitionExpression(DefinitionExpressionSyntax syntax) {
         String name = syntax.getIdentifierToken().getText();
         BoundExpression boundExpression = bindExpression(syntax.getExpression());
 
         if (variables.containsKey(name)) {
-            VariableSymbol variable = variables.getVariableSymbolFromName(name);
-            if (variable.type() != boundExpression.getType()) {
-                diagnostics.reportAttemptToModifyVariableType(syntax.getIdentifierToken(), variable.type(), boundExpression.getType());
-            }
+            diagnostics.reportVariableRedeclaration(syntax.getIdentifierToken());
+            return new BoundLiteralExpression(0);
+        }
+
+        Class<?> definedDatatype = nameToDatatype(syntax.getType().getText());
+        if (definedDatatype == null) {
+            diagnostics.reportInvalidType(syntax.getType());
+            return new BoundLiteralExpression(0);
+        }
+        if (definedDatatype != boundExpression.getType()) {
+            diagnostics.reportIncorrectTypeAssignment(syntax.getIdentifierToken(), definedDatatype, boundExpression.getType());
+            return new BoundLiteralExpression(0);
         }
 
         return new BoundAssignmentExpression(name, boundExpression);
+    }
+
+    private BoundExpression bindAssignmentExpression(AssignmentExpressionSyntax syntax) {
+        String name = syntax.getIdentifierToken().getText();
+        BoundExpression boundExpression = bindExpression(syntax.getExpression());
+
+        if (!variables.containsKey(name))
+            return new BoundLiteralExpression(0);
+
+        VariableSymbol variable = variables.getVariableSymbolFromName(name);
+        if (variable.type() != boundExpression.getType()) {
+            diagnostics.reportIncorrectTypeAssignment(syntax.getIdentifierToken(), variable.type(), boundExpression.getType());
+            return new BoundLiteralExpression(0);
+        }
+
+        return new BoundAssignmentExpression(name, boundExpression);
+    }
+
+    // Todo: Find a better way to do this than to have them all hardcoded in the binder
+    private Class<?> nameToDatatype(String name) {
+        return switch (name) {
+            case "int" -> Integer.class;
+            case "double" -> Double.class;
+            case "boolean" -> Boolean.class;
+            default -> null;
+        };
     }
 
 }

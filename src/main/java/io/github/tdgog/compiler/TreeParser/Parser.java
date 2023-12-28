@@ -114,6 +114,16 @@ public class Parser {
 
     private ExpressionSyntax parseAssignmentExpression() {
         if (getCurrent().getSyntaxKind() == SyntaxKind.IdentifierToken
+                && peek(1).getSyntaxKind() == SyntaxKind.IdentifierToken
+                && peek(2).getSyntaxKind() == SyntaxKind.EqualsToken) {
+            SyntaxToken type = nextToken();
+            SyntaxToken identifier = nextToken();
+            SyntaxToken operator = nextToken();
+            ExpressionSyntax right = parseAssignmentExpression();
+            return new DefinitionExpressionSyntax(type, identifier, operator, right);
+        }
+
+        if (getCurrent().getSyntaxKind() == SyntaxKind.IdentifierToken
                 && peek(1).getSyntaxKind() == SyntaxKind.EqualsToken) {
             SyntaxToken identifier = nextToken();
             SyntaxToken operator = nextToken();

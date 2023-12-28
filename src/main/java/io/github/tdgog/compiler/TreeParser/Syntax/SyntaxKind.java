@@ -32,6 +32,7 @@ public enum SyntaxKind {
     BracketExpression,
     LiteralExpression,
     NameExpression,
+    DefinitionExpression,
     AssignmentExpression,
 
     // Keywords
