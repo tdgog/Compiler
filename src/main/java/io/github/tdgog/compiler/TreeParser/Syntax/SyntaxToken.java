@@ -28,6 +28,7 @@ public class SyntaxToken extends SyntaxNode {
         this(syntaxKind, position, text, null);
     }
 
+    @Override
     public TextSpan getTextSpan() {
         return new TextSpan(position, text.length());
     }

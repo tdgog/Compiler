@@ -4,14 +4,12 @@ import io.github.tdgog.compiler.Binder.Binder;
 import io.github.tdgog.compiler.Binder.BoundExpression;
 import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
 import io.github.tdgog.compiler.CodeAnalysis.VariableCollection;
-import io.github.tdgog.compiler.CodeAnalysis.VariableSymbol;
 import io.github.tdgog.compiler.Evaluation.Evaluator;
-import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxNode;
-import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxTree;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Scanner;
 
 /**
@@ -20,9 +18,10 @@ import java.util.Scanner;
 public class Compiler {
 
     private static final Scanner scanner = new Scanner(System.in);
+    private static final Writer writer = new PrintWriter(System.out);
     private static final VariableCollection variables = new VariableCollection();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         boolean showTree = false;
 
         String lineBuffer = "";
@@ -58,8 +57,10 @@ public class Compiler {
             BoundExpression boundExpression = binder.bindExpression(syntaxTree.getRoot());
 
             // Display the syntax tree
-            if (showTree)
-                printSyntaxTree(syntaxTree.getRoot());
+            if (showTree) {
+                syntaxTree.getRoot().writeTo(writer);
+                writer.flush();
+            }
 
             // Print any errors
             DiagnosticCollection diagnostics = DiagnosticCollection.createFrozen(
@@ -74,40 +75,6 @@ public class Compiler {
                 System.out.println(result);
             }
         }
-    }
-
-    /**
-     * Prints the syntax tree
-     * @param node The parent node to start from
-     */
-    private static void printSyntaxTree(SyntaxNode node) {
-        printSyntaxTree(node, "", true, false);
-    }
-
-    /**
-     * Prints the syntax tree
-     * @param node The node to start from
-     * @param indent The current indentation
-     * @param isFirst Is this the first node in the entire tree?
-     * @param isLast Is this the last child node of the parent?
-     */
-    private static void printSyntaxTree(@NotNull SyntaxNode node, String indent, boolean isFirst, boolean isLast) {
-        // Print the node type and value
-        String marker = isFirst ? "" : isLast ? "└───" : "├───";
-        System.out.print(indent + marker + node.getSyntaxKind());
-        if (node instanceof SyntaxToken token && token.getValue() != null)
-            System.out.print(" " + token.getValue());
-        System.out.println();
-
-        // Find the last child of this parent node to determine which line type to use
-        SyntaxNode lastChild = null;
-        if (!node.getChildren().isEmpty())
-            lastChild = node.getChildren().getLast();
-
-        // Recursively print the children of this node
-        indent += isFirst ? "" : isLast ? "    " : "│   ";
-        for (SyntaxNode child : node.getChildren())
-            printSyntaxTree(child, indent, false, child == lastChild);
     }
 
     // Disable org.reflections logging
