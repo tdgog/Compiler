@@ -66,6 +66,7 @@ public class Compiler {
             DiagnosticCollection diagnostics = DiagnosticCollection.createFrozen(
                     syntaxTree.getDiagnostics(),
                     binder.getDiagnostics());
+            diagnostics.setSource(syntaxTree.getText());
             diagnostics.print(line);
 
             // Evaluate the syntax tree

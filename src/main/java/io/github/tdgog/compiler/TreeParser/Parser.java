@@ -13,12 +13,14 @@ import java.util.ArrayList;
 
 public class Parser {
 
+    private final SourceText text;
     private final SyntaxToken[] tokens;
     private int position;
     @Getter
     private final DiagnosticCollection diagnostics = new DiagnosticCollection();
 
     public Parser(SourceText text) {
+        this.text = text;
         this.tokens = lex(text);
     }
 
@@ -106,7 +108,7 @@ public class Parser {
     public SyntaxTree parse() {
         ExpressionSyntax expression = parseExpression();
         SyntaxToken eofToken = match(SyntaxKind.EOFToken);
-        return new SyntaxTree(expression, eofToken, diagnostics);
+        return new SyntaxTree(text, expression, eofToken, diagnostics);
     }
 
     private ExpressionSyntax parseExpression() {

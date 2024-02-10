@@ -2,15 +2,19 @@ package io.github.tdgog.compiler.CodeAnalysis;
 
 import io.github.tdgog.compiler.CodeAnalysis.Logging.ClassNameConverter;
 import io.github.tdgog.compiler.CodeAnalysis.Logging.Colors;
+import io.github.tdgog.compiler.Text.SourceText;
 import io.github.tdgog.compiler.Text.TextSpan;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class DiagnosticCollection implements Iterable<Diagnostic> {
 
+    @Setter
+    private SourceText source;
     private final List<Diagnostic> diagnostics = new ArrayList<>();
     private boolean frozen = false;
 
@@ -18,7 +22,7 @@ public class DiagnosticCollection implements Iterable<Diagnostic> {
         if (frozen)
             return;
 
-        Diagnostic diagnostic = new Diagnostic(textSpan, "Error: " + message);
+        Diagnostic diagnostic = new Diagnostic(textSpan, message);
         diagnostics.add(diagnostic);
     }
 
@@ -94,9 +98,16 @@ public class DiagnosticCollection implements Iterable<Diagnostic> {
     }
 
     public void print(String line) {
+        if (source == null)
+            throw new RuntimeException("Diagnostic source not set. Call DiagnosticCollection#setSource(SourceText) before printing.");
+
         for (Diagnostic diagnostic : diagnostics) {
+            int lineIndex = source.getLineIndex(diagnostic.textSpan().start());
+            int lineNumber = lineIndex + 1;
+            int character = diagnostic.textSpan().start() - source.getLines().get(lineIndex).start() + 1;
+
             TextSpan span = diagnostic.textSpan();
-            System.out.println(Colors.Foreground.RED + diagnostic + Colors.RESET);
+            System.out.println(Colors.Foreground.RED + "Line " + lineNumber + " column " + character + ": " + diagnostic + Colors.RESET);
             System.out.println("\t" + line);
             System.out.println("\t"
                     + Colors.Foreground.RED

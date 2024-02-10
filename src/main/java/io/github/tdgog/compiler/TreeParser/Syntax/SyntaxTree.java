@@ -14,6 +14,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class SyntaxTree {
 
+    private final SourceText text;
     private final ExpressionSyntax root;
     private final SyntaxToken eofToken;
     private final DiagnosticCollection diagnostics;
