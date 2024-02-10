@@ -1,4 +1,4 @@
-package io.github.tdgog.compiler.CodeAnalysis;
+package io.github.tdgog.compiler.Text;
 
 public record TextSpan(int start, int length) {
 

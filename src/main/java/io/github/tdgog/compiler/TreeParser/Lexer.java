@@ -1,10 +1,12 @@
 package io.github.tdgog.compiler.TreeParser;
 
 import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
-import io.github.tdgog.compiler.CodeAnalysis.TextSpan;
+import io.github.tdgog.compiler.Text.TextSpan;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Lexer {
 
@@ -70,56 +72,17 @@ public class Lexer {
         if (Character.isDigit(getCurrentCharacter())
                 || (getCurrentCharacter() == '.' && Character.isDigit(getCharacterAtPosition(position + 1)))) {
 
-            boolean dotFound = false;
-            int start = position;
-            while (Character.isDigit(getCurrentCharacter())
-                    || (getCurrentCharacter() == '.' && Character.isDigit(getCharacterAtPosition(position + 1)))) {
-                // Only permit a single decimal character
-                if (getCurrentCharacter() == '.') {
-                    if (dotFound) {
-                        next();
-                        break;
-                    }
-                    dotFound = true;
-                }
-
-                next();
-            }
-
-            int length = position - start;
-            String value = text.substring(start, start + length);
-
-            if (TokenDatatypeChecker.isInteger(value))
-                return new SyntaxToken(SyntaxKind.IntegerToken, start, value, Integer.parseInt(value));
-            else if (TokenDatatypeChecker.isFloat(value))
-                return new SyntaxToken(SyntaxKind.FloatToken, start, value, Double.parseDouble(value));
-            else
-                diagnostics.reportInvalidNumber(new TextSpan(start, length), value, Double.class);
+            SyntaxToken numberToken = readNumber();
+            if (numberToken != null) return numberToken;
         }
 
         // If the current character is whitespace, return a whitespace token
         if (Character.isWhitespace(getCurrentCharacter())) {
-            int start = position;
-            while (Character.isWhitespace(getCurrentCharacter())) {
-                next();
-            }
-
-            int length = position - start;
-            String value = text.substring(start, start + length);
-
-            return new SyntaxToken(SyntaxKind.WhitespaceToken, start, value);
+            return readWhitespace();
         }
 
         if (Character.isLetter(getCurrentCharacter())) {
-            int start = position;
-            while (Character.isLetter(getCurrentCharacter())) {
-                next();
-            }
-
-            int length = position - start;
-            String value = text.substring(start, start + length);
-            SyntaxKind syntaxKind = SyntaxKind.getKeywordKind(value);
-            return new SyntaxToken(syntaxKind, start, value);
+            return readIdentifierOrKeyword();
         }
 
         // If the current character is a symbol, return the token for that symbol
@@ -171,6 +134,62 @@ public class Lexer {
         // Return a bad token if the current character is not part of a valid token
         diagnostics.reportBadCharacter(position, getCurrentCharacter());
         return new SyntaxToken(SyntaxKind.BadToken, position++, text.substring(position - 1, position));
+    }
+
+    @Nullable
+    private SyntaxToken readNumber() {
+        boolean dotFound = false;
+        int start = position;
+        while (Character.isDigit(getCurrentCharacter())
+                || (getCurrentCharacter() == '.' && Character.isDigit(getCharacterAtPosition(position + 1)))) {
+            // Only permit a single decimal character
+            if (getCurrentCharacter() == '.') {
+                if (dotFound) {
+                    next();
+                    break;
+                }
+                dotFound = true;
+            }
+
+            next();
+        }
+
+        int length = position - start;
+        String value = text.substring(start, start + length);
+
+        if (TokenDatatypeChecker.isInteger(value))
+            return new SyntaxToken(SyntaxKind.IntegerToken, start, value, Integer.parseInt(value));
+        else if (TokenDatatypeChecker.isFloat(value))
+            return new SyntaxToken(SyntaxKind.FloatToken, start, value, Double.parseDouble(value));
+
+        diagnostics.reportInvalidNumber(new TextSpan(start, length), value, Double.class);
+        return null;
+    }
+
+    @NotNull
+    private SyntaxToken readWhitespace() {
+        int start = position;
+        while (Character.isWhitespace(getCurrentCharacter())) {
+            next();
+        }
+
+        int length = position - start;
+        String value = text.substring(start, start + length);
+
+        return new SyntaxToken(SyntaxKind.WhitespaceToken, start, value);
+    }
+
+    @NotNull
+    private SyntaxToken readIdentifierOrKeyword() {
+        int start = position;
+        while (Character.isLetter(getCurrentCharacter())) {
+            next();
+        }
+
+        int length = position - start;
+        String value = text.substring(start, start + length);
+        SyntaxKind syntaxKind = SyntaxKind.getKeywordKind(value);
+        return new SyntaxToken(syntaxKind, start, value);
     }
 
 }
