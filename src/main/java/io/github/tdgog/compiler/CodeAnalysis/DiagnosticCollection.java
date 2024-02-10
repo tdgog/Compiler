@@ -108,10 +108,11 @@ public class DiagnosticCollection implements Iterable<Diagnostic> {
 
             TextSpan span = diagnostic.textSpan();
             System.out.println(Colors.Foreground.RED + "Line " + lineNumber + " column " + character + ": " + diagnostic + Colors.RESET);
-            System.out.println("\t" + line);
+            for (String l : line.split("\\n"))
+                System.out.println("\t" + l);
             System.out.println("\t"
                     + Colors.Foreground.RED
-                    + " ".repeat(span.start())
+                    + " ".repeat(character - 1)
                     + "^".repeat(span.length())
                     + Colors.RESET);
         }

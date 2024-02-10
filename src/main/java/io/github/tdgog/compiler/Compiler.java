@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Scanner;
+import java.util.StringJoiner;
 
 /**
  * The main class of the compiler
@@ -29,9 +30,9 @@ public class Compiler {
             // Get the line from the shell - a line ends when a semicolon is found.
             // Anything remaining after the semicolon is stored in a buffer to be used for the next line.
             System.out.print("> ");
-            StringBuilder lineBuilder = new StringBuilder(lineBuffer);
+            StringJoiner lineBuilder = new StringJoiner("\n", lineBuffer, "");
             while (!lineBuilder.toString().contains(";"))
-                lineBuilder.append(scanner.nextLine());
+                lineBuilder.add(scanner.nextLine());
             String line = lineBuilder.toString();
             lineBuffer = line.substring(line.indexOf(';') + 1);
             line = line.substring(0, line.indexOf(';'));
