@@ -1,6 +1,7 @@
 package io.github.tdgog.compiler.TreeParser;
 
 import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
+import io.github.tdgog.compiler.Text.SourceText;
 import io.github.tdgog.compiler.Text.TextSpan;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
@@ -10,12 +11,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class Lexer {
 
-    private final String text;
+    private final SourceText text;
     private int position;
     @Getter
     private final DiagnosticCollection diagnostics = new DiagnosticCollection();
     
-    public Lexer(String text) {
+    public Lexer(SourceText text) {
         this.text = text;
     }
 

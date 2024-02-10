@@ -1,6 +1,6 @@
 package io.github.tdgog.compiler.TreeParser.Syntax;
 
-import io.github.tdgog.compiler.CodeAnalysis.TextSpan;
+import io.github.tdgog.compiler.Text.TextSpan;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

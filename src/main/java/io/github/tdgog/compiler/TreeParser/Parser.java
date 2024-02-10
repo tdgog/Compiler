@@ -1,6 +1,7 @@
 package io.github.tdgog.compiler.TreeParser;
 
 import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
+import io.github.tdgog.compiler.Text.SourceText;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.*;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
@@ -17,7 +18,7 @@ public class Parser {
     @Getter
     private final DiagnosticCollection diagnostics = new DiagnosticCollection();
 
-    public Parser(String text) {
+    public Parser(SourceText text) {
         this.tokens = lex(text);
     }
 
@@ -26,7 +27,7 @@ public class Parser {
      * @param text The text to be lexed
      * @return The tokens
      */
-    private SyntaxToken @NotNull [] lex(String text) {
+    private SyntaxToken @NotNull [] lex(SourceText text) {
         ArrayList<SyntaxToken> tokens = new ArrayList<>();
 
         Lexer lexer = new Lexer(text);
