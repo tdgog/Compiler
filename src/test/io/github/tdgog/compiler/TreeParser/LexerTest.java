@@ -46,6 +46,10 @@ public class LexerTest {
         );
     }
 
+    /**
+     * This method provides a stream of arguments for the testLexSyntaxKindPair method.
+     * @return A stream of arguments for the testLexSyntaxKindPair method.
+     */
     private static Stream<Arguments> provideTestLexSyntaxKindPairArgs() {
         Stream.Builder<Arguments> argumentsBuilder = Stream.builder();
 
@@ -78,6 +82,11 @@ public class LexerTest {
         return argumentsBuilder.build();
     }
 
+    /**
+     * This method tests the lexer's ability to correctly identify the syntax kind of a token.
+     * @param lexString The string to be lexed.
+     * @param expected The expected syntax kind of the token.
+     */
     @ParameterizedTest
     @MethodSource("provideTestLexSyntaxKindArgs")
     public void testLexSyntaxKind(String lexString, SyntaxKind expected) {
@@ -88,6 +97,11 @@ public class LexerTest {
         Assertions.assertEquals(Collections.singletonList(expected), recieved);
     }
 
+    /**
+     * This method tests the lexer's ability to correctly identify the syntax kind of any possible pair of tokens
+     * @param lexString The string to be lexed.
+     * @param expected The expected syntax kind of the token pair.
+     */
     @ParameterizedTest
     @MethodSource("provideTestLexSyntaxKindPairArgs")
     public void testLexSyntaxKindPair(String lexString, List<SyntaxKind> expected) {
@@ -97,6 +111,12 @@ public class LexerTest {
         Assertions.assertEquals(expected, recieved);
     }
 
+    /**
+     * Checks if the two syntax kinds require a separator between them to be lexed as different tokens
+     * @param left The left token
+     * @param right The right token
+     * @return True if the two syntax kinds require a separator, false otherwise
+     */
     private static boolean requiresSeparator(SyntaxKind left, SyntaxKind right) {
         if (left == SyntaxKind.IdentifierToken || right == SyntaxKind.IdentifierToken)
             return true;
@@ -120,6 +140,11 @@ public class LexerTest {
         return false;
     }
 
+    /**
+     * Gets the syntax kinds of a list of tokens
+     * @param tokens The list of tokens
+     * @return The list of syntax kinds
+     */
     private ArrayList<SyntaxKind> getSyntaxKinds(ArrayList<Token> tokens) {
         ArrayList<SyntaxKind> kinds = new ArrayList<>();
         for (Token token : tokens)
@@ -127,6 +152,11 @@ public class LexerTest {
         return kinds;
     }
 
+    /**
+     * Gets the tokens of a string
+     * @param lexString The string to be lexed
+     * @return The list of tokens
+     */
     private ArrayList<Token> getTokens(String lexString) {
         ArrayList<Token> tokens = new ArrayList<>();
 
@@ -140,6 +170,9 @@ public class LexerTest {
         return tokens;
     }
 
+    /**
+     * A private record to store a token and its kind
+     */
     private record Token(SyntaxKind kind, String text) {
         @Override
         public String toString() {
