@@ -1,5 +1,7 @@
 package io.github.tdgog.compiler.TreeParser.Syntax;
 
+import io.github.tdgog.compiler.CodeAnalysis.Logging.Colors;
+import io.github.tdgog.compiler.Compiler;
 import io.github.tdgog.compiler.Text.TextSpan;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,12 +43,24 @@ public abstract class SyntaxNode {
      * @param isLast Is this the last child node of the parent?
      */
     private static void printSyntaxTree(Writer writer, @NotNull SyntaxNode node, String indent, boolean isFirst, boolean isLast) throws IOException {
+        // Check if it's writing to console
+        boolean toConsole = writer == Compiler.getWriter();
+
         // Print the node type and value
         String marker = isFirst ? "" : isLast ? "└───" : "├───";
-        writer.write(indent + marker + node.getSyntaxKind());
+        writer.write(indent + marker);
+
+        if (toConsole)
+            writer.write(getColor(node.getSyntaxKind()));
+
+        writer.write("" + node.getSyntaxKind());
+
         if (node instanceof SyntaxToken token && token.getValue() != null)
             writer.write(" " + token.getValue());
         writer.write('\n');
+
+        if (toConsole)
+            writer.write(Colors.RESET);
 
         // Find the last child of this parent node to determine which line type to use
         SyntaxNode lastChild = null;
@@ -57,6 +71,19 @@ public abstract class SyntaxNode {
         indent += isFirst ? "" : isLast ? "    " : "│   ";
         for (SyntaxNode child : node.getChildren())
             printSyntaxTree(writer, child, indent, false, child == lastChild);
+    }
+
+    private static String getColor(SyntaxKind kind) {
+        return switch (kind) {
+            case BadToken -> Colors.Foreground.RED;
+            case IntegerToken, FalseKeyword, TrueKeyword, IdentifierToken, FloatToken -> Colors.Foreground.CYAN;
+            case PlusToken, EqualsToken, CloseBracketToken, BangEqualsToken, OpenBracketToken, DoubleEqualsToken,
+                    DoublePipeToken, DoubleAmpersandToken, BangToken, ModuloToken, DivideToken, MultiplyToken,
+                    MinusToken -> Colors.Foreground.BLUE;
+            case UnaryExpression, BinaryExpression, BracketExpression, LiteralExpression, NameExpression,
+                    DefinitionExpression, AssignmentExpression -> Colors.Foreground.PURPLE;
+            default -> Colors.RESET;
+        };
     }
 
 }

@@ -3,9 +3,11 @@ package io.github.tdgog.compiler;
 import io.github.tdgog.compiler.Binder.Binder;
 import io.github.tdgog.compiler.Binder.BoundExpression;
 import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
+import io.github.tdgog.compiler.CodeAnalysis.Logging.Colors;
 import io.github.tdgog.compiler.CodeAnalysis.VariableCollection;
 import io.github.tdgog.compiler.Evaluation.Evaluator;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxTree;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -19,6 +21,7 @@ import java.util.StringJoiner;
 public class Compiler {
 
     private static final Scanner scanner = new Scanner(System.in);
+    @Getter
     private static final Writer writer = new PrintWriter(System.out);
     private static final VariableCollection variables = new VariableCollection();
 
@@ -29,10 +32,13 @@ public class Compiler {
         while (true) {
             // Get the line from the shell - a line ends when a semicolon is found.
             // Anything remaining after the semicolon is stored in a buffer to be used for the next line.
-            System.out.print("> ");
+            System.out.print(Colors.Foreground.GREEN + "» " + Colors.RESET);
             StringJoiner lineBuilder = new StringJoiner("\n", lineBuffer, "");
-            while (!lineBuilder.toString().contains(";"))
+            while (!lineBuilder.toString().contains(";")) {
+                if (lineBuilder.length() != 0)
+                    System.out.print(Colors.Foreground.GREEN + "› " + Colors.RESET);
                 lineBuilder.add(scanner.nextLine());
+            }
             String line = lineBuilder.toString();
             lineBuffer = line.substring(line.indexOf(';') + 1);
             line = line.substring(0, line.indexOf(';'));
@@ -74,7 +80,7 @@ public class Compiler {
             if (diagnostics.isEmpty()) {
                 Evaluator evaluator = new Evaluator(boundExpression, variables);
                 Object result = evaluator.evaluate();
-                System.out.println(result);
+                System.out.println("  " + Colors.Foreground.YELLOW + result + Colors.RESET);
             }
         }
     }
