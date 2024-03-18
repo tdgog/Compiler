@@ -61,7 +61,7 @@ public class Compiler {
             // Parse the line into a bound syntax tree
             SyntaxTree syntaxTree = SyntaxTree.parse(line);
             Binder binder = new Binder(variables);
-            BoundExpression boundExpression = binder.bindExpression(syntaxTree.getRoot());
+            BoundExpression boundExpression = binder.bindExpression(syntaxTree.getRoot().getExpression());
 
             // Display the syntax tree
             if (showTree) {

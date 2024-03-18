@@ -37,7 +37,10 @@ public enum SyntaxKind {
 
     // Keywords
     TrueKeyword,
-    FalseKeyword;
+    FalseKeyword,
+
+    // Nodes
+    CompilationUnit;
 
     /**
      * Returns an integer representing the position in the precedence hierarchy.

@@ -5,7 +5,6 @@ import io.github.tdgog.compiler.Text.SourceText;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.*;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxKind;
 import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
-import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxTree;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -105,10 +104,10 @@ public class Parser {
      * Parses the tokens into an expression tree
      * @return The expression tree
      */
-    public SyntaxTree parse() {
+    public CompilationUnitSyntax parseCompilationUnit() {
         ExpressionSyntax expression = parseExpression();
         SyntaxToken eofToken = match(SyntaxKind.EOFToken);
-        return new SyntaxTree(text, expression, eofToken, diagnostics);
+        return new CompilationUnitSyntax(expression, eofToken);
     }
 
     private ExpressionSyntax parseExpression() {
@@ -199,5 +198,4 @@ public class Parser {
             }
         }
     }
-
 }
