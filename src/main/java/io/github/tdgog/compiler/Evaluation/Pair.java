@@ -23,7 +23,7 @@ public record Pair(Class<?> left, Class<?> right) {
         return false;
     }
 
-    public boolean eitherEquals(Class<?> other) {
+    public boolean contains(Class<?> other) {
         return Objects.equals(left, other) || Objects.equals(right, other);
     }
 

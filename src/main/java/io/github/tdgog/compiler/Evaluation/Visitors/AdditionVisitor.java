@@ -20,7 +20,7 @@ public class AdditionVisitor implements Visitor {
     public BiFunction<Object, Object, Object> getMethod(Pair arguments) {
         if (arguments.equals(Integer.class))
             return operations.get(arguments);
-        if (arguments.eitherEquals(Double.class))
+        if (arguments.contains(Double.class))
             return operations.get(new Pair(Double.class, Double.class));
         return null;
     }
