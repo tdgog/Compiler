@@ -1,12 +1,12 @@
 package io.github.tdgog.compiler;
 
-import io.github.tdgog.compiler.Binder.Binder;
-import io.github.tdgog.compiler.Binder.Scope.BoundGlobalScope;
-import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
-import io.github.tdgog.compiler.CodeAnalysis.Logging.Colors;
-import io.github.tdgog.compiler.CodeAnalysis.VariableCollection;
-import io.github.tdgog.compiler.Evaluation.Evaluator;
-import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxTree;
+import io.github.tdgog.compiler.binder.Binder;
+import io.github.tdgog.compiler.binder.scope.BoundGlobalScope;
+import io.github.tdgog.compiler.codeanalysis.DiagnosticCollection;
+import io.github.tdgog.compiler.codeanalysis.logging.Colors;
+import io.github.tdgog.compiler.codeanalysis.VariableCollection;
+import io.github.tdgog.compiler.evaluation.Evaluator;
+import io.github.tdgog.compiler.treeparser.syntax.SyntaxTree;
 import lombok.Getter;
 
 import java.io.IOException;
