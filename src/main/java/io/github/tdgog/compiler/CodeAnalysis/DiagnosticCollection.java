@@ -9,7 +9,10 @@ import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringJoiner;
 
 public class DiagnosticCollection implements Iterable<Diagnostic> {
 
@@ -86,6 +89,12 @@ public class DiagnosticCollection implements Iterable<Diagnostic> {
         report(token.getTextSpan(), message);
     }
 
+    public void reportAttemptToAssignToUndeclaredVariable(SyntaxToken token, TextSpan span) {
+        String message = "Variable '" + token.getText() + "' has not been declared. Consider declaring the variable as " +
+                "[type] " + source.substring(span) + ";";
+        report(token.getTextSpan(), message);
+    }
+
     public void addAll(DiagnosticCollection diagnostics) {
         if (frozen)
             return;
@@ -126,9 +135,14 @@ public class DiagnosticCollection implements Iterable<Diagnostic> {
         return diagnostics;
     }
 
+    public DiagnosticCollection freeze() {
+        return createFrozen(this);
+    }
+
     @NotNull
     @Override
     public Iterator<Diagnostic> iterator() {
         return diagnostics.iterator();
     }
+
 }

@@ -5,26 +5,41 @@ import io.github.tdgog.compiler.Binder.Binary.BoundBinaryOperator;
 import io.github.tdgog.compiler.Binder.Literal.BoundLiteralExpression;
 import io.github.tdgog.compiler.Binder.Named.BoundAssignmentExpression;
 import io.github.tdgog.compiler.Binder.Named.BoundVariableExpression;
+import io.github.tdgog.compiler.Binder.Scope.BoundGlobalScope;
+import io.github.tdgog.compiler.Binder.Scope.BoundScope;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryExpression;
 import io.github.tdgog.compiler.Binder.Unary.BoundUnaryOperator;
 import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
-import io.github.tdgog.compiler.CodeAnalysis.VariableCollection;
 import io.github.tdgog.compiler.CodeAnalysis.VariableSymbol;
+import io.github.tdgog.compiler.Text.SourceText;
 import io.github.tdgog.compiler.TreeParser.Syntax.Expressions.*;
+import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxTree;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
  * Used to walk the syntax tree and aid in type checking
  */
 @Getter
-@RequiredArgsConstructor
 public final class Binder {
 
     private final DiagnosticCollection diagnostics = new DiagnosticCollection();
-    private final VariableCollection variables;
+    private final BoundScope scope;
+
+    public static BoundGlobalScope bindGlobalScope(SyntaxTree syntaxTree) {
+        Binder binder = new Binder(null, syntaxTree.getText());
+        BoundExpression expression = binder.bindExpression(syntaxTree.getRoot().getExpression());
+        List<VariableSymbol> variables = binder.scope.getDeclaredVariables();
+        DiagnosticCollection diagnostics = binder.getDiagnostics().freeze();
+        return new BoundGlobalScope(null, diagnostics, variables, expression);
+    }
+
+    public Binder(BoundScope parent, SourceText source) {
+        scope = new BoundScope(parent);
+        diagnostics.setSource(source);
+    }
 
     public BoundExpression bindExpression(ExpressionSyntax syntax) {
         return switch (syntax.getSyntaxKind()) {
@@ -74,20 +89,22 @@ public final class Binder {
 
     private BoundExpression bindNameExpression(NameExpressionSyntax syntax) {
         String name = syntax.getIdentifierToken().getText();
-        if (!variables.containsKey(name)) {
+        VariableSymbol variable = scope.tryLookup(name);
+
+        if (variable == null) {
             diagnostics.reportUndefinedName(syntax.getIdentifierToken().getTextSpan(), name);
             return new BoundLiteralExpression(0);
         }
 
-        Object type = variables.get(name);
-        return new BoundVariableExpression(new VariableSymbol(name, type.getClass()));
+        return new BoundVariableExpression(variable);
     }
 
     private BoundExpression bindDefinitionExpression(DefinitionExpressionSyntax syntax) {
         String name = syntax.getIdentifierToken().getText();
         BoundExpression boundExpression = bindExpression(syntax.getExpression());
 
-        if (variables.containsKey(name)) {
+        VariableSymbol variable = new VariableSymbol(name, boundExpression.getType());
+        if (!scope.tryDeclare(variable)) {
             diagnostics.reportVariableRedeclaration(syntax.getIdentifierToken());
             return new BoundLiteralExpression(0);
         }
@@ -109,10 +126,12 @@ public final class Binder {
         String name = syntax.getIdentifierToken().getText();
         BoundExpression boundExpression = bindExpression(syntax.getExpression());
 
-        if (!variables.containsKey(name))
+        VariableSymbol variable = new VariableSymbol(name, boundExpression.getType());
+        if (!scope.getDeclaredVariables().contains(variable)) {
+            diagnostics.reportAttemptToAssignToUndeclaredVariable(syntax.getIdentifierToken(), syntax.getTextSpan());
             return new BoundLiteralExpression(0);
+        }
 
-        VariableSymbol variable = variables.getVariableSymbolFromName(name);
         if (variable.type() != boundExpression.getType()) {
             diagnostics.reportIncorrectTypeAssignment(syntax.getIdentifierToken(), variable.type(), boundExpression.getType());
             return new BoundLiteralExpression(0);

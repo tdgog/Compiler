@@ -1,7 +1,7 @@
 package io.github.tdgog.compiler;
 
 import io.github.tdgog.compiler.Binder.Binder;
-import io.github.tdgog.compiler.Binder.BoundExpression;
+import io.github.tdgog.compiler.Binder.Scope.BoundGlobalScope;
 import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
 import io.github.tdgog.compiler.CodeAnalysis.Logging.Colors;
 import io.github.tdgog.compiler.CodeAnalysis.VariableCollection;
@@ -60,8 +60,7 @@ public class Compiler {
 
             // Parse the line into a bound syntax tree
             SyntaxTree syntaxTree = SyntaxTree.parse(line);
-            Binder binder = new Binder(variables);
-            BoundExpression boundExpression = binder.bindExpression(syntaxTree.getRoot().getExpression());
+            BoundGlobalScope globalScope = Binder.bindGlobalScope(syntaxTree);
 
             // Display the syntax tree
             if (showTree) {
@@ -72,13 +71,13 @@ public class Compiler {
             // Print any errors
             DiagnosticCollection diagnostics = DiagnosticCollection.createFrozen(
                     syntaxTree.getDiagnostics(),
-                    binder.getDiagnostics());
+                    globalScope.getDiagnostics());
             diagnostics.setSource(syntaxTree.getText());
             diagnostics.print(line);
 
             // Evaluate the syntax tree
             if (diagnostics.isEmpty()) {
-                Evaluator evaluator = new Evaluator(boundExpression, variables);
+                Evaluator evaluator = new Evaluator(globalScope.getExpression(), variables);
                 Object result = evaluator.evaluate();
                 System.out.println("  " + Colors.Foreground.YELLOW + result + Colors.RESET);
             }
