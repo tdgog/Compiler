@@ -1,18 +1,19 @@
 package io.github.tdgog.compiler;
 
-import io.github.tdgog.compiler.Binder.Binder;
-import io.github.tdgog.compiler.Binder.BoundExpression;
-import io.github.tdgog.compiler.CodeAnalysis.DiagnosticCollection;
-import io.github.tdgog.compiler.CodeAnalysis.VariableCollection;
-import io.github.tdgog.compiler.CodeAnalysis.VariableSymbol;
-import io.github.tdgog.compiler.Evaluation.Evaluator;
-import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxNode;
-import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxToken;
-import io.github.tdgog.compiler.TreeParser.Syntax.SyntaxTree;
-import org.jetbrains.annotations.NotNull;
+import io.github.tdgog.compiler.binder.Binder;
+import io.github.tdgog.compiler.binder.scope.BoundGlobalScope;
+import io.github.tdgog.compiler.codeanalysis.DiagnosticCollection;
+import io.github.tdgog.compiler.codeanalysis.logging.Colors;
+import io.github.tdgog.compiler.codeanalysis.VariableCollection;
+import io.github.tdgog.compiler.evaluation.Evaluator;
+import io.github.tdgog.compiler.treeparser.syntax.SyntaxTree;
+import lombok.Getter;
 
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Scanner;
+import java.util.StringJoiner;
 
 /**
  * The main class of the compiler
@@ -20,19 +21,24 @@ import java.util.Scanner;
 public class Compiler {
 
     private static final Scanner scanner = new Scanner(System.in);
+    @Getter
+    private static final Writer writer = new PrintWriter(System.out);
     private static final VariableCollection variables = new VariableCollection();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         boolean showTree = false;
 
         String lineBuffer = "";
         while (true) {
             // Get the line from the shell - a line ends when a semicolon is found.
             // Anything remaining after the semicolon is stored in a buffer to be used for the next line.
-            System.out.print("> ");
-            StringBuilder lineBuilder = new StringBuilder(lineBuffer);
-            while (!lineBuilder.toString().contains(";"))
-                lineBuilder.append(scanner.nextLine());
+            System.out.print(Colors.Foreground.GREEN + "» " + Colors.RESET);
+            StringJoiner lineBuilder = new StringJoiner("\n", lineBuffer, "");
+            while (!lineBuilder.toString().contains(";")) {
+                if (lineBuilder.length() != 0)
+                    System.out.print(Colors.Foreground.GREEN + "› " + Colors.RESET);
+                lineBuilder.add(scanner.nextLine());
+            }
             String line = lineBuilder.toString();
             lineBuffer = line.substring(line.indexOf(';') + 1);
             line = line.substring(0, line.indexOf(';'));
@@ -54,60 +60,28 @@ public class Compiler {
 
             // Parse the line into a bound syntax tree
             SyntaxTree syntaxTree = SyntaxTree.parse(line);
-            Binder binder = new Binder(variables);
-            BoundExpression boundExpression = binder.bindExpression(syntaxTree.getRoot());
+            BoundGlobalScope globalScope = Binder.bindGlobalScope(syntaxTree);
 
             // Display the syntax tree
-            if (showTree)
-                printSyntaxTree(syntaxTree.getRoot());
+            if (showTree) {
+                syntaxTree.getRoot().writeTo(writer);
+                writer.flush();
+            }
 
             // Print any errors
             DiagnosticCollection diagnostics = DiagnosticCollection.createFrozen(
                     syntaxTree.getDiagnostics(),
-                    binder.getDiagnostics());
+                    globalScope.getDiagnostics());
+            diagnostics.setSource(syntaxTree.getText());
             diagnostics.print(line);
 
             // Evaluate the syntax tree
             if (diagnostics.isEmpty()) {
-                Evaluator evaluator = new Evaluator(boundExpression, variables);
+                Evaluator evaluator = new Evaluator(globalScope.getExpression(), variables);
                 Object result = evaluator.evaluate();
-                System.out.println(result);
+                System.out.println("  " + Colors.Foreground.YELLOW + result + Colors.RESET);
             }
         }
-    }
-
-    /**
-     * Prints the syntax tree
-     * @param node The parent node to start from
-     */
-    private static void printSyntaxTree(SyntaxNode node) {
-        printSyntaxTree(node, "", true, false);
-    }
-
-    /**
-     * Prints the syntax tree
-     * @param node The node to start from
-     * @param indent The current indentation
-     * @param isFirst Is this the first node in the entire tree?
-     * @param isLast Is this the last child node of the parent?
-     */
-    private static void printSyntaxTree(@NotNull SyntaxNode node, String indent, boolean isFirst, boolean isLast) {
-        // Print the node type and value
-        String marker = isFirst ? "" : isLast ? "└───" : "├───";
-        System.out.print(indent + marker + node.getSyntaxKind());
-        if (node instanceof SyntaxToken token && token.getValue() != null)
-            System.out.print(" " + token.getValue());
-        System.out.println();
-
-        // Find the last child of this parent node to determine which line type to use
-        SyntaxNode lastChild = null;
-        if (!node.getChildren().isEmpty())
-            lastChild = node.getChildren().getLast();
-
-        // Recursively print the children of this node
-        indent += isFirst ? "" : isLast ? "    " : "│   ";
-        for (SyntaxNode child : node.getChildren())
-            printSyntaxTree(child, indent, false, child == lastChild);
     }
 
     // Disable org.reflections logging
