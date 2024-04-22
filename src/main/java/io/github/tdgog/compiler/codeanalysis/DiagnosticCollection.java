@@ -18,7 +18,7 @@ public class DiagnosticCollection implements Iterable<Diagnostic> {
 
     @Setter
     private SourceText source;
-    private final List<Diagnostic> diagnostics = new ArrayList<>();
+    public final List<Diagnostic> diagnostics = new ArrayList<>();
     private boolean frozen = false;
 
     private void report(TextSpan textSpan, String message) {

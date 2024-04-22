@@ -1,5 +1,6 @@
 package io.github.tdgog.compiler.binder;
 
+import io.github.tdgog.compiler.Compilation;
 import io.github.tdgog.compiler.binder.binary.BoundBinaryExpression;
 import io.github.tdgog.compiler.binder.binary.BoundBinaryOperator;
 import io.github.tdgog.compiler.binder.literal.BoundLiteralExpression;
@@ -18,6 +19,7 @@ import lombok.Getter;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Stack;
 
 /**
  * Used to walk the syntax tree and aid in type checking
@@ -29,11 +31,42 @@ public final class Binder {
     private final BoundScope scope;
 
     public static BoundGlobalScope bindGlobalScope(SyntaxTree syntaxTree) {
-        Binder binder = new Binder(null, syntaxTree.getText());
+        return bindGlobalScope(null, syntaxTree);
+    }
+
+    public static BoundGlobalScope bindGlobalScope(Compilation previous, SyntaxTree syntaxTree) {
+        BoundGlobalScope previousScope = null;
+        if (previous != null)
+            previousScope = previous.getGlobalScope();
+
+        Binder binder = new Binder(createParentScopes(previousScope), syntaxTree.getText());
         BoundExpression expression = binder.bindExpression(syntaxTree.getRoot().getExpression());
         List<VariableSymbol> variables = binder.scope.getDeclaredVariables();
         DiagnosticCollection diagnostics = binder.getDiagnostics().freeze();
-        return new BoundGlobalScope(null, diagnostics, variables, expression);
+
+        if (previous != null)
+            diagnostics = DiagnosticCollection.createFrozen(previousScope.getDiagnostics(), diagnostics);
+        return new BoundGlobalScope(previousScope, diagnostics, variables, expression);
+    }
+
+    private static BoundScope createParentScopes(BoundGlobalScope previous) {
+        Stack<BoundGlobalScope> stack = new Stack<>();
+        while (previous != null) {
+            stack.push(previous);
+            previous = previous.getPrevious();
+        }
+
+        BoundScope parent = null;
+        while (!stack.isEmpty()) {
+            BoundGlobalScope current = stack.pop();
+            BoundScope scope = new BoundScope(parent);
+            for (VariableSymbol variable : current.getVariables()) {
+                scope.tryDeclare(variable);
+            }
+            parent = scope;
+        }
+
+        return parent;
     }
 
     public Binder(BoundScope parent, SourceText source) {

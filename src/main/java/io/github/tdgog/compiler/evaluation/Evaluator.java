@@ -59,7 +59,7 @@ public final class Evaluator {
         }
 
         try {
-            Set<Class<? extends Visitor>> visitors = new Reflections("io.github.tdgog.compiler.Evaluation.Visitors").getSubTypesOf(Visitor.class);
+            Set<Class<? extends Visitor>> visitors = new Reflections("io.github.tdgog.compiler.evaluation.visitors").getSubTypesOf(Visitor.class);
             for (Class<? extends Visitor> clazz : visitors) {
                 Visitor visitor = clazz.getDeclaredConstructor().newInstance();
                 if (!visitor.acceptsOperator(operatorKind))
@@ -73,6 +73,10 @@ public final class Evaluator {
         }
 
         throw new RuntimeException("Unexpected binary operator " + operatorKind);
+    }
+
+    private String tempformatter(Object o) {
+        return o + "[" + o.getClass() + "]";
     }
 
     private Object evaluateUnaryExpression(BoundUnaryExpression expression) {

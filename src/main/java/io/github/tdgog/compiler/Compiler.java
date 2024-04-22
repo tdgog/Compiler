@@ -2,10 +2,9 @@ package io.github.tdgog.compiler;
 
 import io.github.tdgog.compiler.binder.Binder;
 import io.github.tdgog.compiler.binder.scope.BoundGlobalScope;
-import io.github.tdgog.compiler.codeanalysis.DiagnosticCollection;
 import io.github.tdgog.compiler.codeanalysis.logging.Colors;
 import io.github.tdgog.compiler.codeanalysis.VariableCollection;
-import io.github.tdgog.compiler.evaluation.Evaluator;
+import io.github.tdgog.compiler.evaluation.EvaluationResult;
 import io.github.tdgog.compiler.treeparser.syntax.SyntaxTree;
 import lombok.Getter;
 
@@ -24,6 +23,7 @@ public class Compiler {
     @Getter
     private static final Writer writer = new PrintWriter(System.out);
     private static final VariableCollection variables = new VariableCollection();
+    private static Compilation previous;
 
     public static void main(String[] args) throws IOException {
         boolean showTree = false;
@@ -60,7 +60,12 @@ public class Compiler {
 
             // Parse the line into a bound syntax tree
             SyntaxTree syntaxTree = SyntaxTree.parse(line);
-            BoundGlobalScope globalScope = Binder.bindGlobalScope(syntaxTree);
+
+            // Compile and get result
+            Compilation compilation = previous == null
+                    ? new Compilation(syntaxTree)
+                    : previous.continueWith(syntaxTree);
+            EvaluationResult result = compilation.evaluate(line, variables);
 
             // Display the syntax tree
             if (showTree) {
@@ -68,20 +73,19 @@ public class Compiler {
                 writer.flush();
             }
 
-            // Print any errors
-            DiagnosticCollection diagnostics = DiagnosticCollection.createFrozen(
-                    syntaxTree.getDiagnostics(),
-                    globalScope.getDiagnostics());
-            diagnostics.setSource(syntaxTree.getText());
-            diagnostics.print(line);
-
-            // Evaluate the syntax tree
-            if (diagnostics.isEmpty()) {
-                Evaluator evaluator = new Evaluator(globalScope.getExpression(), variables);
-                Object result = evaluator.evaluate();
-                System.out.println("  " + Colors.Foreground.YELLOW + result + Colors.RESET);
+            if (result.diagnostics().isEmpty()) {
+                System.out.println("  " + Colors.Foreground.YELLOW + result.value() + Colors.RESET);
             }
+
+            previous = compilation;
         }
+    }
+
+    private BoundGlobalScope globalScope;
+    private synchronized BoundGlobalScope getGlobalScope(SyntaxTree syntaxTree) {
+        if (globalScope == null)
+            globalScope = Binder.bindGlobalScope(syntaxTree);
+        return globalScope;
     }
 
     // Disable org.reflections logging
