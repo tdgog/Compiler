@@ -24,8 +24,6 @@ public class SyntaxTree {
         this.text = text;
         root = parser.parseCompilationUnit();
         diagnostics = parser.getDiagnostics();
-
-
     }
 
     public static SyntaxTree parse(String text) {

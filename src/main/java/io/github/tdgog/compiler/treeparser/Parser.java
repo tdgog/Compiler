@@ -2,9 +2,9 @@ package io.github.tdgog.compiler.treeparser;
 
 import io.github.tdgog.compiler.codeanalysis.DiagnosticCollection;
 import io.github.tdgog.compiler.text.SourceText;
-import io.github.tdgog.compiler.treeparser.syntax.expressions.*;
 import io.github.tdgog.compiler.treeparser.syntax.SyntaxKind;
 import io.github.tdgog.compiler.treeparser.syntax.SyntaxToken;
+import io.github.tdgog.compiler.treeparser.syntax.expressions.*;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -176,7 +176,7 @@ public class Parser {
         switch (getCurrent().getSyntaxKind()) {
             case OpenBracketToken -> {
                 SyntaxToken openBracketToken = nextToken();
-                ExpressionSyntax expression = parseBinaryExpression();
+                ExpressionSyntax expression = parseExpression();
                 SyntaxToken closeBracketToken = match(SyntaxKind.CloseBracketToken);
                 return new BracketExpressionSyntax(openBracketToken, expression, closeBracketToken);
             }

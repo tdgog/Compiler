@@ -44,17 +44,20 @@ public class Compiler {
             line = line.substring(0, line.indexOf(';'));
 
             // Debug functionality
-            if (line.equalsIgnoreCase("!showtree")) {
+            if (line.equalsIgnoreCase("#showtree")) {
                 showTree = !showTree;
                 System.out.println("Show parse tree: " + showTree);
                 continue;
-            } else if (line.equalsIgnoreCase("!clear")) {
+            } else if (line.equalsIgnoreCase("#clear")) {
                 System.out.println("\n".repeat(100));
                 continue;
-            } else if (line.equalsIgnoreCase("!quit")) {
+            } else if (line.equalsIgnoreCase("#quit")) {
                 break;
-            } else if (line.equalsIgnoreCase("!variables")) {
+            } else if (line.equalsIgnoreCase("#variables")) {
                 System.out.println(variables);
+                continue;
+            } else if (line.equalsIgnoreCase("#reset")) {
+                previous = null;
                 continue;
             }
 
@@ -75,9 +78,8 @@ public class Compiler {
 
             if (result.diagnostics().isEmpty()) {
                 System.out.println("  " + Colors.Foreground.YELLOW + result.value() + Colors.RESET);
+                previous = compilation;
             }
-
-            previous = compilation;
         }
     }
 
