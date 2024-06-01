@@ -37,7 +37,7 @@ public final class Binder {
     public static BoundGlobalScope bindGlobalScope(Compilation previous, SyntaxTree syntaxTree) {
         BoundGlobalScope previousScope = previous == null ? null : previous.getGlobalScope();
         Binder binder = new Binder(createParentScopes(previousScope), syntaxTree.getText());
-        BoundExpression expression = binder.bindExpression(syntaxTree.getRoot().getExpression());
+        BoundExpression expression = binder.bindExpression(syntaxTree.getRoot().getStatement());
         List<VariableSymbol> variables = binder.scope.getDeclaredVariables();
         DiagnosticCollection diagnostics = binder.getDiagnostics().freeze();
 

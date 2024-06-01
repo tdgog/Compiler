@@ -100,6 +100,10 @@ public class Lexer {
                 return new SyntaxToken(SyntaxKind.OpenBracketToken, position++, "(");
             case ')':
                 return new SyntaxToken(SyntaxKind.CloseBracketToken, position++, ")");
+            case '{':
+                return new SyntaxToken(SyntaxKind.OpenBraceToken, position++, "{");
+            case '}':
+                return new SyntaxToken(SyntaxKind.CloseBraceToken, position++, "}");
             case '%':
                 return new SyntaxToken(SyntaxKind.ModuloToken, position++, "%");
             case '&':

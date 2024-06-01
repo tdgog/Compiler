@@ -23,6 +23,8 @@ public enum SyntaxKind {
     BangEqualsToken,
     OpenBracketToken,
     CloseBracketToken,
+    OpenBraceToken,
+    CloseBraceToken,
     IdentifierToken,
     EqualsToken,
 
@@ -34,6 +36,10 @@ public enum SyntaxKind {
     NameExpression,
     DefinitionExpression,
     AssignmentExpression,
+
+    // Statements
+    BlockStatement,
+    ExpressionStatement,
 
     // Keywords
     TrueKeyword,

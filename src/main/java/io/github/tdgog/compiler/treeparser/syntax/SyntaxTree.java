@@ -3,7 +3,6 @@ package io.github.tdgog.compiler.treeparser.syntax;
 import io.github.tdgog.compiler.codeanalysis.DiagnosticCollection;
 import io.github.tdgog.compiler.text.SourceText;
 import io.github.tdgog.compiler.treeparser.Parser;
-import io.github.tdgog.compiler.treeparser.syntax.expressions.CompilationUnitSyntax;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

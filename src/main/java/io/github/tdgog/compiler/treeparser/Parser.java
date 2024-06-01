@@ -2,9 +2,13 @@ package io.github.tdgog.compiler.treeparser;
 
 import io.github.tdgog.compiler.codeanalysis.DiagnosticCollection;
 import io.github.tdgog.compiler.text.SourceText;
+import io.github.tdgog.compiler.treeparser.syntax.CompilationUnitSyntax;
 import io.github.tdgog.compiler.treeparser.syntax.SyntaxKind;
 import io.github.tdgog.compiler.treeparser.syntax.SyntaxToken;
 import io.github.tdgog.compiler.treeparser.syntax.expressions.*;
+import io.github.tdgog.compiler.treeparser.syntax.statements.BlockStatementSyntax;
+import io.github.tdgog.compiler.treeparser.syntax.statements.ExpressionStatementSyntax;
+import io.github.tdgog.compiler.treeparser.syntax.statements.StatementSyntax;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -105,9 +109,31 @@ public class Parser {
      * @return The expression tree
      */
     public CompilationUnitSyntax parseCompilationUnit() {
-        ExpressionSyntax expression = parseExpression();
+        StatementSyntax statement = parseStatement();
         SyntaxToken eofToken = match(SyntaxKind.EOFToken);
-        return new CompilationUnitSyntax(expression, eofToken);
+        return new CompilationUnitSyntax(statement, eofToken);
+    }
+
+    private StatementSyntax parseStatement() {
+        if (getCurrent().getSyntaxKind() == SyntaxKind.OpenBraceToken)
+            return parseBlockStatement();
+        return parseExpressionStatement();
+    }
+
+    private StatementSyntax parseBlockStatement() {
+        ArrayList<StatementSyntax> statements = new ArrayList<>();
+        SyntaxToken openBraceToken = match(SyntaxKind.OpenBraceToken);
+
+        while (getCurrent().getSyntaxKind() != SyntaxKind.EOFToken && getCurrent().getSyntaxKind() != SyntaxKind.CloseBraceToken) {
+            statements.add(parseStatement());
+        }
+
+        SyntaxToken closeBraceToken = match(SyntaxKind.OpenBraceToken);
+        return new BlockStatementSyntax(openBraceToken, statements, closeBraceToken);
+    }
+
+    private StatementSyntax parseExpressionStatement() {
+        return new ExpressionStatementSyntax(parseExpression());
     }
 
     private ExpressionSyntax parseExpression() {

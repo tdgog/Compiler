@@ -32,6 +32,8 @@ public class LexerTest {
                 Arguments.of("=", SyntaxKind.EqualsToken),
                 Arguments.of("(", SyntaxKind.OpenBracketToken),
                 Arguments.of(")", SyntaxKind.CloseBracketToken),
+                Arguments.of("{", SyntaxKind.OpenBraceToken),
+                Arguments.of("}", SyntaxKind.CloseBraceToken),
                 Arguments.of("+", SyntaxKind.PlusToken),
                 Arguments.of("-", SyntaxKind.MinusToken),
                 Arguments.of("*", SyntaxKind.MultiplyToken),

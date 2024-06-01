@@ -1,8 +1,6 @@
-package io.github.tdgog.compiler.treeparser.syntax.expressions;
+package io.github.tdgog.compiler.treeparser.syntax;
 
-import io.github.tdgog.compiler.treeparser.syntax.SyntaxKind;
-import io.github.tdgog.compiler.treeparser.syntax.SyntaxNode;
-import io.github.tdgog.compiler.treeparser.syntax.SyntaxToken;
+import io.github.tdgog.compiler.treeparser.syntax.statements.StatementSyntax;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -13,7 +11,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class CompilationUnitSyntax extends SyntaxNode {
 
-    private final ExpressionSyntax expression;
+    private final StatementSyntax statement;
     private final SyntaxToken eofToken;
 
     @Override
@@ -23,6 +21,6 @@ public class CompilationUnitSyntax extends SyntaxNode {
 
     @Override
     public ArrayList<SyntaxNode> getChildren() {
-        return new ArrayList<>(Arrays.asList(expression, eofToken));
+        return new ArrayList<>(Arrays.asList(statement, eofToken));
     }
 }
